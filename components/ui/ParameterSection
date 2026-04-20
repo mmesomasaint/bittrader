@@ -1,0 +1,39 @@
+export function ParameterSection() {
+  return (
+    <div className="card-binance space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Leverage Tweak */}
+        <div className="space-y-4">
+          <div className="flex justify-between">
+            <label className="text-xs font-bold text-gray-500 uppercase">Max Leverage</label>
+            <span className="text-xs font-bold text-binance-yellow">10x</span>
+          </div>
+          <input type="range" className="w-full accent-binance-yellow h-1 bg-binance-black rounded-lg appearance-none cursor-pointer" />
+        </div>
+
+        {/* Sentiment Threshold */}
+        <div className="space-y-4">
+          <div className="flex justify-between">
+            <label className="text-xs font-bold text-gray-500 uppercase">AI Sensitivity</label>
+            <span className="text-xs font-bold text-binance-green">0.75</span>
+          </div>
+          <input type="range" className="w-full accent-binance-yellow h-1 bg-binance-black rounded-lg appearance-none cursor-pointer" />
+        </div>
+      </div>
+
+      <div className="pt-6 border-t border-binance-border flex items-center justify-between">
+        <div>
+          <p className="text-sm font-bold">Slippage Guard</p>
+          <p className="text-xs text-gray-500">Prevent entry if price moves {'>'}0.5% from signal time.</p>
+        </div>
+        <div className="w-10 h-5 bg-binance-yellow rounded-full relative cursor-pointer">
+          <div className="absolute right-1 top-1 w-3 h-3 bg-black rounded-full" />
+        </div>
+      </div>
+
+      <button className="w-full py-3 bg-binance-gray border border-binance-border rounded-md text-sm font-bold hover:bg-binance-border transition-colors">
+        Update Parameters
+      </button>
+    </div>
+  );
+}

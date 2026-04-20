@@ -1,0 +1,21 @@
+export function ApiKeySection() {
+  return (
+    <div className="card-binance space-y-6">
+      <div className="bg-binance-yellow/10 border border-binance-yellow/30 p-4 rounded-lg flex gap-3">
+        <div className="text-binance-yellow">⚠️</div>
+        <p className="text-xs text-binance-yellow leading-relaxed">
+          <strong>Security Protocol:</strong> When generating your API key, ensure 
+          "Enable Withdrawals" is <strong>UNCHECKED</strong>. Optima Logic only 
+          requires "Read" and "Futures/Spot Trading" permissions.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <InputGroup label="API Key" placeholder="**********" />
+        <InputGroup label="API Secret" placeholder="**********" type="password" />
+      </div>
+
+      <button className="btn-binance w-full py-3">Save Credentials</button>
+    </div>
+  );
+}
