@@ -2,7 +2,8 @@
 import { useState } from "react";
 import PaystackPop from "@paystack/inline-js";
 import { useUser } from "@/hooks/use-user";
-import { Loader2, Zap } from "lucide-react";
+import { Loader2, Zap, CheckCircle2, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export function UpgradeButton() {
   const { user } = useUser();
@@ -20,11 +21,20 @@ export function UpgradeButton() {
       paymentRequest: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE, // Ensure this plan exists in your Paystack dashboard
       onSuccess: (transaction: any) => {
         setIsInitializing(false);
+        toast.success("SYSTEM_AUTHORIZED", {
+          description: "Pro account initialized",
+          icon: <CheckCircle2 className="text-crypto-green" size={16} />,
+        });
+
         // The webhook handles the tier upgrade; we just show a success state
         window.location.href = "/dashboard?payment=success";
       },
       onCancel: () => {
         setIsInitializing(false);
+        toast.error("PAYMENT_CANCELLED", {
+          description: "Your payment was cancelled.",
+          icon: <AlertCircle className="text-crypto-red" size={16} />,
+        });
       },
       onError: (error: any) => {
         setIsInitializing(false);

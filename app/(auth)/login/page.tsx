@@ -3,7 +3,8 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase/supabaseClient";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { KeyRound, Mail, Loader2 } from "lucide-react";
+import { KeyRound, Mail, Loader2, AlertCircle } from "lucide-react";
+import { toast } from 'sonner';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -21,7 +22,10 @@ export default function Login() {
     });
 
     if (error) {
-      alert(error.message);
+      toast.error("LOGIN FAILED", {
+        description: "There was an error logging you in.",
+        icon: <AlertCircle className="text-crypto-red" size={16} />,
+      });
       setLoading(false);
     } else {
       router.push("/dashboard");
