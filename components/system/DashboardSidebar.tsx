@@ -14,7 +14,6 @@ export default function DashboardSidebar({ user }: { user: any }) {
     { name: 'Terminal', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Intel', href: '/intel', icon: Zap }, // Added your Intel page
     { name: 'Settings', href: '/settings', icon: Settings },
-    { name: 'Guidance', href: '/guidance', icon: BookOpen },
   ];
 
   const handleSignOut = async () => {
