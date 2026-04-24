@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/supabaseClient';
 import { Zap, Activity, TrendingUp, Wallet, ArrowUpRight } from "lucide-react";
