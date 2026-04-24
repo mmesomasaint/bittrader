@@ -1,7 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+// The function name MUST now be 'proxy' or a default export
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -38,7 +39,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // This will refresh the session if it's expired
+  // Refresh session
   await supabase.auth.getUser()
 
   return response
@@ -46,13 +47,9 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/dashboard/:path*', 
+    '/intel/:path*', 
+    '/settings/:path*',
+    '/api/protected/:path*',
   ],
 }

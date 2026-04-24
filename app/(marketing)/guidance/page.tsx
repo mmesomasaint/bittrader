@@ -23,7 +23,7 @@ export default function GuidancePage() {
     <div className="max-w-4xl mx-auto py-20 px-6">
       <div className="mb-16">
         <h1 className="text-4xl font-black text-white mb-4 italic uppercase">System Guidance</h1>
-        <p className="text-gray-400">Follow these protocols to calibrate your Black Marlin engine for 1.90ms execution.</p>
+        <p className="text-gray-400">Follow these protocols to calibrate your BitTrader engine for 1.90ms execution.</p>
       </div>
 
       <div className="grid gap-12">
@@ -43,7 +43,7 @@ export default function GuidancePage() {
       <div className="mt-20 p-8 bg-crypto-card border border-crypto-border rounded-2xl border-l-4 border-l-crypto-green">
         <h4 className="text-white font-bold mb-2">Pro-Architect Tip:</h4>
         <p className="text-sm text-gray-400">
-          For maximum reliability, ensure your Bybit account has sufficient USDT in the <span className="text-white">Unified Trading Account (UTA)</span>. The Black Marlin engine will auto-detect available margin.
+          For maximum reliability, ensure your Bybit account has sufficient USDT in the <span className="text-white">Unified Trading Account (UTA)</span>. The BitTrader engine will auto-detect available margin.
         </p>
       </div>
     </div>

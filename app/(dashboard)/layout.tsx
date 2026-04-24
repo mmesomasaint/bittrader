@@ -1,7 +1,6 @@
 "use client";
 
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { LayoutDashboard, Settings, BookOpen, LogOut } from "lucide-react";
 import Link from "next/link";

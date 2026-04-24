@@ -16,8 +16,8 @@ export function UpgradeButton() {
     paystack.newTransaction({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
       email: user?.email || "",
-      amount: 25000 * 100, // 25,000 NGN in kobo
-      paymentRequest: "PLN_your_pro_code", // Ensure this plan exists in your Paystack dashboard
+      amount: 125000 * 100, // 25,000 NGN in kobo
+      paymentRequest: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE, // Ensure this plan exists in your Paystack dashboard
       onSuccess: (transaction: any) => {
         setIsInitializing(false);
         // The webhook handles the tier upgrade; we just show a success state

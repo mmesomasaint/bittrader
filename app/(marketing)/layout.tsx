@@ -7,7 +7,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <nav className="border-b border-crypto-border bg-crypto-bg/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="text-xl font-black italic text-white flex items-center gap-2">
-            <span className="text-crypto-gold">BIT</span> TRADER
+            <span className="text-crypto-gold">BIT</span>TRADER
           </Link>
           <div className="flex items-center gap-6 text-sm font-medium">
             <Link href="/guidance" className="hover:text-crypto-gold transition">Guidance</Link>
