@@ -6,6 +6,43 @@ import { BrainCircuit, Timer, BarChart, Eye, ChevronRight, Activity } from "luci
 export default function IntelPage() {
   const [signals, setSignals] = useState<any[]>([]);
   const [selectedSignal, setSelectedSignal] = useState<any>(null);
+  const [isexecuting, setIsExecuting] = useState(false);
+
+  const handleManualExecute = async () => {
+    if (!selectedSignal) return;
+    setIsExecuting(true);
+  
+    try {
+      const response = await fetch('/api/trade/execute', {
+        method: 'POST',
+        body: JSON.stringify({
+          signalId: selectedSignal.id,
+          exchange: 'bybit' // Defaulting to Bybit for now
+        })
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        if (result.error === 'UPGRADE_REQUIRED') {
+          setShowUpgrade(true); // Open your existing upgrade modal
+        } else {
+          toast.error(result.error, { description: result.message });
+        }
+        return;
+      }
+  
+      toast.success("EXECUTION_CONFIRMED", {
+        description: result.message,
+        icon: <Zap size={16} className="text-crypto-green" />
+      });
+  
+    } catch (error) {
+      toast.error("NETWORK_ERROR", { description: "Failed to reach execution node." });
+    } finally {
+      setIsExecuting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchIntel = async () => {
@@ -131,9 +168,14 @@ export default function IntelPage() {
                  <div className="text-[10px] text-gray-600">
                    SIGNAL SOURCE: <span className="text-white">OPTIMA_BITTRADER_NODE_01</span>
                  </div>
-                 <button className="bg-crypto-gold text-black px-6 py-2 rounded font-black text-xs uppercase hover:bg-[#fcd535] transition flex items-center gap-2">
-                   EXECUTE MANUAL POSITION <ChevronRight size={14} />
-                 </button>
+                 <button 
+                    disabled={isExecuting}
+                    onClick={handleManualExecute}
+                    className="bg-crypto-gold text-black px-6 py-2 rounded font-black text-xs uppercase hover:bg-[#fcd535] transition flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {isExecuting ? 'INITIALIZING...' : 'EXECUTE MANUAL POSITION'}
+                    {!isExecuting && <ChevronRight size={14} />}
+                  </button>
               </div>
             </div>
           ) : (
