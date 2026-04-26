@@ -1,51 +1,88 @@
-import { BookOpen, CheckCircle2, Terminal, ShieldAlert } from "lucide-react";
+"use client";
+import { Book, Shield, Zap, Terminal, ChevronRight, Cpu } from "lucide-react";
+
+const SECTIONS = [
+  {
+    id: 'protocol',
+    title: 'BITTRADER_PROTOCOL',
+    icon: Zap,
+    content: "The BitTrader engine utilizes high-velocity volume analysis and liquidity gap identification. It is designed to find 'the move before the move' by tracking whale net-flow across Binance and Bybit."
+  },
+  {
+    id: 'security',
+    title: 'VAULT_SECURITY',
+    icon: Shield,
+    content: "API keys are never stored in plain text. They are encrypted at the edge and only decrypted within the execution runtime environment. We recommend IP-whitelisting the SG-01-EXECUTOR node for maximum safety."
+  },
+  {
+    id: 'execution',
+    title: 'TRADE_EXECUTION',
+    icon: Cpu,
+    content: "Execution latency is currently benchmarked at 1.90ms. Manual overrides can be triggered via the Intelligence Core, but the automated executor will always prioritize risk-adjusted entry points."
+  }
+];
 
 export default function GuidancePage() {
-  const steps = [
-    {
-      title: "API Configuration",
-      desc: "Generate a System-generated API Key on Bybit with 'Unified Trading' permissions.",
-      icon: Terminal,
-    },
-    {
-      title: "IP Whitelisting",
-      desc: "You MUST whitelist the Optima Node IP in your Bybit settings to allow execution.",
-      icon: ShieldAlert,
-    },
-    {
-      title: "Telegram Handshake",
-      desc: "Connect your Telegram via the Dashboard to receive sub-second trade heartbeats.",
-      icon: CheckCircle2,
-    },
-  ];
-
   return (
-    <div className="max-w-4xl mx-auto py-20 px-6">
-      <div className="mb-16">
-        <h1 className="text-4xl font-black text-white mb-4 italic uppercase">System Guidance</h1>
-        <p className="text-gray-400">Follow these protocols to calibrate your BitTrader engine for 1.90ms execution.</p>
+    <div className="p-8 max-w-5xl mx-auto space-y-12 bg-crypto-bg min-h-screen font-mono">
+      {/* Header */}
+      <header className="border-b border-white/5 pb-8">
+        <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase">Operations_Manual v1.0</h1>
+        <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-2">Subject: Institutional-Grade Speculation Infrastructure</p>
+      </header>
+
+      {/* Hero: The Workflow Diagram */}
+      <div className="bg-[#0A0A0A] border border-white/5 rounded-3xl p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-4 opacity-10">
+          <Terminal size={120} />
+        </div>
+        <h3 className="text-xs font-black text-white uppercase mb-6 flex items-center gap-2">
+          <Book size={14} className="text-crypto-gold" /> System_Hierarchy
+        </h3>
+        
+        
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
+            <p className="text-crypto-gold text-[10px] font-black mb-1">01_SCAN</p>
+            <p className="text-[10px] text-gray-400">BitTrader scanner identifies volume anomalies and order book imbalances.</p>
+          </div>
+          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
+            <p className="text-crypto-gold text-[10px] font-black mb-1">02_ANALYZE</p>
+            <p className="text-[10px] text-gray-400">Reasoning engine assigns a confidence score based on historical win-rates.</p>
+          </div>
+          <div className="p-4 bg-white/[0.02] border border-white/5 rounded-xl">
+            <p className="text-crypto-gold text-[10px] font-black mb-1">03_EXECUTE</p>
+            <p className="text-[10px] text-gray-400">Executor node deploys capital to Bybit/Binance within 1.90ms of signal.</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-12">
-        {steps.map((step, i) => (
-          <div key={i} className="flex gap-6 items-start group">
-            <div className="bg-crypto-card border border-crypto-border p-4 rounded-xl group-hover:border-crypto-gold transition-colors">
-              <step.icon className="text-crypto-gold" size={24} />
+      {/* Deep Dive Sections */}
+      <div className="space-y-6">
+        {SECTIONS.map((section) => (
+          <div key={section.id} className="group border-l-2 border-white/5 hover:border-crypto-gold transition-all pl-6 py-4">
+            <div className="flex items-center gap-3 mb-3">
+              <section.icon size={18} className="text-gray-500 group-hover:text-crypto-gold transition-colors" />
+              <h2 className="text-lg font-black text-white italic tracking-tight">{section.title}</h2>
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-white mb-2">0{i + 1}. {step.title}</h3>
-              <p className="text-gray-400 leading-relaxed">{step.desc}</p>
-            </div>
+            <p className="text-sm text-gray-400 leading-relaxed max-w-3xl font-sans">
+              {section.content}
+            </p>
+            <button className="mt-4 flex items-center gap-1 text-[10px] font-black text-crypto-gold uppercase tracking-widest hover:gap-2 transition-all">
+              View Technical Specs <ChevronRight size={12} />
+            </button>
           </div>
         ))}
       </div>
 
-      <div className="mt-20 p-8 bg-crypto-card border border-crypto-border rounded-2xl border-l-4 border-l-crypto-green">
-        <h4 className="text-white font-bold mb-2">Pro-Architect Tip:</h4>
-        <p className="text-sm text-gray-400">
-          For maximum reliability, ensure your Bybit account has sufficient USDT in the <span className="text-white">Unified Trading Account (UTA)</span>. The BitTrader engine will auto-detect available margin.
-        </p>
-      </div>
+      {/* Support Footer */}
+      <footer className="bg-crypto-card border border-white/5 p-8 rounded-2xl flex flex-col items-center text-center">
+        <p className="text-xs text-gray-500 uppercase font-black mb-4">Still Encountering Friction?</p>
+        <button className="bg-white text-black px-8 py-3 rounded-lg font-black text-xs uppercase hover:bg-gray-200 transition-all">
+          Contact System Administrator
+        </button>
+      </footer>
     </div>
   );
 }
