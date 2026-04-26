@@ -4,58 +4,82 @@ import ccxt from 'ccxt';
 
 export async function POST(req: Request) {
   const supabase = await createClient();
-  const { signalId, exchange } = await req.json();
+  const { signalId, exchange: exchangeId } = await req.json();
 
-  // Get User Session
+  // GATEKEEPER: Session & Tier Check
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
+  if (!user) return NextResponse.json({ error: 'AUTH_REQUIRED' }, { status: 401 });
 
-  // Fetch Profile & Check PRO Status
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+  if (profile?.tier !== 'pro') return NextResponse.json({ error: 'UPGRADE_REQUIRED' }, { status: 403 });
 
-  if (profile?.tier !== 'pro') {
-    return NextResponse.json({ error: 'UPGRADE_REQUIRED', message: 'Manual execution requires PRO clearance.' }, { status: 403 });
-  }
+  // VAULT: Key Retrieval
+  const apiKey = profile[`${exchangeId}_key`];
+  const apiSecret = profile[`${exchangeId}_secret`];
+  if (!apiKey || !apiSecret) return NextResponse.json({ error: 'VAULT_EMPTY', message: 'No API credentials found.' }, { status: 400 });
 
-  // Credential Check
-  const apiKey = profile[`${exchange}_key`];
-  const apiSecret = profile[`${exchange}_secret`];
-
-  if (!apiKey || !apiSecret) {
-    return NextResponse.json({ error: 'KEYS_MISSING', message: `No ${exchange} credentials found in Vault.` }, { status: 400 });
-  }
-
-  // Fetch Signal Data
+  // INTEL: Signal Verification
   const { data: signal } = await supabase.from('intel_logs').select('*').eq('id', signalId).single();
-  if (!signal) return NextResponse.json({ error: 'SIGNAL_NOT_FOUND' }, { status: 404 });
+  if (!signal) return NextResponse.json({ error: 'INVALID_SIGNAL' }, { status: 404 });
 
   try {
-    // Initialize Exchange & Execute
-    // For this example, we'll use a market order for speed (1.90ms target)
-    const client = new (ccxt as any)[exchange]({
-      apiKey: apiKey,
+    // NODE: Initialize CCXT Client
+    const exchange = new (ccxt as any)[exchangeId]({
+      apiKey,
       secret: apiSecret,
       enableRateLimit: true,
+      options: { 'defaultType': 'swap' } // Ensure we are on Perpetuals/Futures
     });
 
-    // Example: Market Long/Short based on sentiment
+    const symbol = `${signal.ticker}/USDT:USDT`; // Format for Linear Perpetuals
     const side = signal.sentiment === 'bullish' ? 'buy' : 'sell';
-    
-    // NOTE: In production, you'd calculate position size based on user's risk settings
-    // const order = await client.createMarketOrder(`${signal.ticker}/USDT`, side, amount);
 
-    // For now, we'll simulate success for the UI handshake
+    // RISK_ENGINE: Practical Position Sizing
+    // We fetch balance to ensure we don't 'Over-Leverage'
+    const balance = await exchange.fetchBalance();
+    const availableUsdt = balance.total.USDT || 0;
+    
+    if (availableUsdt < 10) {
+      return NextResponse.json({ error: 'INSUFFICIENT_FUNDS', message: 'Minimum 10 USDT required for node execution.' }, { status: 400 });
+    }
+
+    // Practical Logic: Risking 2% of total balance on this signal
+    // For $1,000 balance, this is a $20 position
+    const amountInUsdt = availableUsdt * 0.02; 
+    
+    // Fetch current price to calculate quantity
+    const ticker = await exchange.fetchTicker(symbol);
+    const quantity = amountInUsdt / ticker.last;
+
+    // EXECUTE: The Heavy Lift
+    const order = await exchange.createMarketOrder(symbol, side, quantity);
+
+    // LOG: Record the manual execution in the 'trades' table
+    await supabase.from('trades').insert({
+      user_id: user.id,
+      symbol: signal.ticker,
+      side: side,
+      entry_price: order.price || ticker.last,
+      status: 'open',
+      exchange: exchangeId,
+      order_id: order.id
+    });
+
     return NextResponse.json({ 
       success: true, 
-      orderId: 'DX-' + Math.random().toString(36).toUpperCase().slice(2, 10),
-      message: `MARKET_${side.toUpperCase()} executed on ${exchange.toUpperCase()}` 
+      message: `SYSTEM_EXECUTED: ${side.toUpperCase()} ${quantity.toFixed(2)} ${signal.ticker}`,
+      orderId: order.id 
     });
 
   } catch (err: any) {
-    return NextResponse.json({ error: 'EXCHANGE_ERROR', message: err.message }, { status: 500 });
+    // Handle specific Exchange Errors
+    let errorType = 'EXECUTION_FAILED';
+    if (err instanceof ccxt.AuthenticationError) errorType = 'INVALID_API_KEYS';
+    if (err instanceof ccxt.InsufficientFunds) errorType = 'MARGIN_INSUFFICIENT';
+
+    return NextResponse.json({ 
+      error: errorType, 
+      message: err.message.slice(0, 100) // Truncate long error strings
+    }, { status: 500 });
   }
 }
