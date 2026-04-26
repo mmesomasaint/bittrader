@@ -13,32 +13,40 @@ export default function IntelPage() {
     setIsExecuting(true);
   
     try {
-      const response = await fetch('/api/trade/execute', {
+      const res = await fetch('/api/trade/execute', {
         method: 'POST',
-        body: JSON.stringify({
-          signalId: selectedSignal.id,
-          exchange: 'bybit' // Defaulting to Bybit for now
+        body: JSON.stringify({ 
+          signalId: selectedSignal.id, 
+          exchange: 'bybit' 
         })
       });
   
-      const result = await response.json();
+      const data = await res.json();
   
-      if (!response.ok) {
-        if (result.error === 'UPGRADE_REQUIRED') {
-          setShowUpgrade(true); // Open your existing upgrade modal
-        } else {
-          toast.error(result.error, { description: result.message });
+      if (!res.ok) {
+        switch(data.error) {
+          case 'UPGRADE_REQUIRED':
+            setShowUpgrade(true);
+            break;
+          case 'VAULT_EMPTY':
+            toast.error("VAULT_OFFLINE", { description: "Please configure API keys in Settings." });
+            break;
+          case 'MARGIN_INSUFFICIENT':
+            toast.error("CAPITAL_ERROR", { description: "Insufficient USDT in your Bybit account." });
+            break;
+          default:
+            toast.error(data.error, { description: data.message });
         }
         return;
       }
   
-      toast.success("EXECUTION_CONFIRMED", {
-        description: result.message,
-        icon: <Zap size={16} className="text-crypto-green" />
+      toast.success("TRADE_LIVE", {
+        description: data.message,
+        icon: <Activity className="text-crypto-green" size={16} />
       });
   
-    } catch (error) {
-      toast.error("NETWORK_ERROR", { description: "Failed to reach execution node." });
+    } catch (e) {
+      toast.error("NODE_TIMEOUT", { description: "The execution node is unresponsive." });
     } finally {
       setIsExecuting(false);
     }
