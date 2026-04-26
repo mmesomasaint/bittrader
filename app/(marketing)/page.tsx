@@ -14,7 +14,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="flex flex-col items-center text-center">
             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1 rounded-full mb-8">
-              <span className="relative flex h-2 w-2">
+              <span className="relative flex h-2 w-2 items-center justify-center">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-crypto-green opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-crypto-green"></span>
               </span>
@@ -137,7 +137,7 @@ export default function LandingPage() {
       <section className="py-32 border-t border-white/5">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-6xl font-black uppercase italic mb-8">Ready to Scale?</h2>
-          <p className="text-gray-500 mb-12 font-data uppercase tracking-widest text-sm">Join Tony and 40+ other operators running Black Marlin.</p>
+          <p className="text-gray-500 mb-12 font-data uppercase tracking-widest text-sm">Join Tony and 40+ other operators running BitTrader.</p>
           <Link href="/signup" className="inline-block bg-crypto-gold text-black px-12 py-6 rounded-full font-black uppercase tracking-widest text-sm hover:scale-105 transition-transform">
             Start Free Trial
           </Link>

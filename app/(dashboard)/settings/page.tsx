@@ -1,7 +1,10 @@
 "use client";
-import { useState } from "react";
-import { ShieldCheck, Trash2, Globe, Lock } from "lucide-react";
+
+import { useState, useEffect } from "react";
+import { ShieldCheck, Trash2, Globe, Lock, Send, BellRing } from "lucide-react";
+import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
+import { createClient } from "@/lib/supabase/client"; // Use the client-side helper
 import { UpgradeModal } from "@/components/system/UpgradeModal";
 
 const EXCHANGES = [
@@ -10,9 +13,72 @@ const EXCHANGES = [
 ];
 
 export default function MultiExchangeSettings() {
-  const { isPro, loading } = useUser();
+  const supabase = createClient();
+  const { user, profile, isPro, loading } = useUser(); // Extract user and profile here
+  
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [activeKeys, setActiveKeys] = useState(['bybit']);
+  const [telegramId, setTelegramId] = useState("");
+  
+  // State for API Keys
+  const [keys, setKeys] = useState({
+    bybit_key: "",
+    bybit_secret: "",
+    binance_key: "",
+    binance_secret: ""
+  });
+
+  // Synchronize state when profile loads
+  useEffect(() => {
+    if (profile) {
+      setTelegramId(profile.telegram_chat_id || "");
+      setKeys({
+        bybit_key: profile.bybit_key || "",
+        bybit_secret: profile.bybit_secret || "",
+        binance_key: profile.binance_key || "",
+        binance_secret: profile.binance_secret || ""
+      });
+    }
+  }, [profile]);
+
+  if (loading) {
+    return <div className="p-8 text-gray-500 font-mono animate-pulse uppercase text-xs">Authenticating_Session...</div>;
+  }
+
+  if (!user) {
+    return <div className="p-8 text-crypto-red font-mono">Error: Unauthorized Access.</div>;
+  }
+
+  const handleSaveKeys = async (exchangeId: string) => {
+    if (!isPro) return setShowUpgrade(true);
+
+    const updates = exchangeId === 'bybit' 
+      ? { bybit_key: keys.bybit_key, bybit_secret: keys.bybit_secret }
+      : { binance_key: keys.binance_key, binance_secret: keys.binance_secret };
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id);
+
+    if (error) {
+      toast.error(`${exchangeId.toUpperCase()}_SYNC_ERROR`, { description: error.message });
+    } else {
+      toast.success(`${exchangeId.toUpperCase()}_VAULT_UPDATED`, { description: "Credentials encrypted and stored." });
+    }
+  };
+
+  const handleSaveTelegram = async () => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ telegram_chat_id: telegramId })
+      .eq('id', user.id);
+
+    if (error) {
+      toast.error("TELEGRAM_SYNC_FAILED", { description: error.message });
+    } else {
+      toast.success("TELEGRAM_AUTHORIZED", { description: "Alerts routed to your ID." });
+    }
+  };
 
   const handleProtectedAction = (e?: any) => {
     if (!isPro) {
@@ -35,7 +101,6 @@ export default function MultiExchangeSettings() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {EXCHANGES.map((ex) => (
           <div key={ex.id} className="bg-crypto-card border border-crypto-border rounded-2xl overflow-hidden flex flex-col relative">
-            {/* Locked Overlay for UI Polish */}
             {!isPro && !loading && (
               <div className="absolute top-2 right-2 text-gray-600">
                 <Lock size={14} />
@@ -47,9 +112,6 @@ export default function MultiExchangeSettings() {
                 <Globe size={16} className={ex.color} />
                 <span className={`font-bold uppercase text-xs ${ex.color}`}>{ex.name} PERPETUALS</span>
               </div>
-              {activeKeys.includes(ex.id) && (
-                <span className="text-[9px] bg-crypto-green/20 text-crypto-green px-2 py-0.5 rounded font-bold">CONNECTED</span>
-              )}
             </div>
 
             <div className="p-6 flex-1 space-y-4">
@@ -58,8 +120,10 @@ export default function MultiExchangeSettings() {
                 <input 
                   disabled={!isPro}
                   type="text" 
-                  className="w-full bg-crypto-bg border border-crypto-border p-3 rounded-lg text-white font-data text-sm focus:border-crypto-gold outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder={isPro ? `${ex.name}_KEY_...` : "Upgrade to unlock API entry"}
+                  value={ex.id === 'bybit' ? keys.bybit_key : keys.binance_key}
+                  onChange={(e) => setKeys({...keys, [`${ex.id}_key`]: e.target.value})}
+                  className="w-full bg-crypto-bg border border-crypto-border p-3 rounded-lg text-white font-data text-sm focus:border-crypto-gold outline-none disabled:opacity-50 cursor-not-allowed"
+                  placeholder={isPro ? "Paste Key..." : "Upgrade Required"}
                 />
               </div>
               <div className="space-y-1">
@@ -67,7 +131,9 @@ export default function MultiExchangeSettings() {
                 <input 
                   disabled={!isPro}
                   type="password" 
-                  className="w-full bg-crypto-bg border border-crypto-border p-3 rounded-lg text-white font-data text-sm focus:border-crypto-gold outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  value={ex.id === 'bybit' ? keys.bybit_secret : keys.binance_secret}
+                  onChange={(e) => setKeys({...keys, [`${ex.id}_secret`]: e.target.value})}
+                  className="w-full bg-crypto-bg border border-crypto-border p-3 rounded-lg text-white font-data text-sm focus:border-crypto-gold outline-none disabled:opacity-50 cursor-not-allowed"
                   placeholder="••••••••••••••••"
                 />
               </div>
@@ -75,36 +141,44 @@ export default function MultiExchangeSettings() {
 
             <div className="p-4 bg-black/20 flex gap-2">
               <button 
-                onClick={handleProtectedAction}
+                onClick={() => handleSaveKeys(ex.id)}
                 className="flex-1 bg-white text-black font-black py-3 rounded-lg hover:bg-gray-200 transition text-sm uppercase tracking-tighter"
               >
-                UPDATE {ex.name.toUpperCase()}
-              </button>
-              <button className="p-3 border border-crypto-red/30 text-crypto-red hover:bg-crypto-red/10 rounded-lg transition">
-                <Trash2 size={18} />
+                UPDATE {ex.name}
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Global Risk Control Card */}
-      <div className={`bg-crypto-card border border-crypto-red/20 rounded-2xl p-6 border-l-4 border-l-crypto-red transition-opacity ${!isPro ? 'opacity-75' : ''}`}>
-        <div className="flex items-center gap-3 mb-4">
-          <ShieldCheck className="text-crypto-red" />
-          <h3 className="font-bold text-white uppercase tracking-wider text-sm italic">Risk Management Protocols</h3>
+      {/* Telegram Card */}
+      <div className="bg-crypto-card border border-[#24A1DE]/20 rounded-2xl overflow-hidden flex flex-col">
+        <div className="p-4 bg-[#24A1DE]/10 border-b border-crypto-border flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Send size={16} className="text-[#24A1DE]" />
+            <span className="font-bold uppercase text-xs text-[#24A1DE]">Telegram Alert Channel</span>
+          </div>
         </div>
-        <div className="flex items-center justify-between p-4 bg-crypto-bg rounded-lg border border-crypto-border">
-          <div>
-            <p className="text-sm font-bold text-white">Cross-Exchange Sync</p>
-            <p className="text-xs text-gray-500 font-data">Duplicate trades on both Binance and Bybit simultaneously.</p>
+        <div className="p-6 space-y-4">
+          <div className="flex items-start gap-4 p-4 bg-black/20 rounded-xl border border-white/5">
+            <BellRing className="text-crypto-gold shrink-0" size={20} />
+            <p className="text-[10px] text-gray-500 leading-relaxed">
+              Message <span className="text-white">@BitTradrrBot</span> and type <span className="text-crypto-gold">/id</span> to get your Chat ID.
+            </p>
           </div>
           <input 
-            type="checkbox" 
-            className="w-5 h-5 accent-crypto-gold cursor-pointer" 
-            onClick={handleProtectedAction}
-            onChange={(e) => { if(!isPro) e.target.checked = false; }}
+            type="text" 
+            value={telegramId}
+            onChange={(e) => setTelegramId(e.target.value)}
+            className="w-full bg-crypto-bg border border-crypto-border p-3 rounded-lg text-white font-mono text-sm outline-none focus:border-[#24A1DE]"
+            placeholder="Enter Chat ID..."
           />
+          <button 
+            onClick={handleSaveTelegram}
+            className="w-full bg-[#24A1DE] text-white font-black py-3 rounded-lg uppercase text-xs"
+          >
+            Sync Telegram
+          </button>
         </div>
       </div>
     </div>

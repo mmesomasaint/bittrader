@@ -36,7 +36,7 @@ export function UpgradeModal({ isOpen, onClose }: { isOpen: boolean, onClose: ()
           </div>
 
           <UpgradeButton />
-          <button onClick={onClose} className="text-[10px] text-gray-600 uppercase font-bold hover:text-white transition">
+          <button onClick={onClose} className="mt-5 text-[10px] text-gray-600 uppercase font-bold hover:text-white transition">
             Continue as Observer
           </button>
         </div>
