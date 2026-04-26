@@ -2,44 +2,38 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/supabaseClient';
-import { Zap, Activity, TrendingUp, Wallet, ArrowUpRight } from "lucide-react";
+import { useUser } from '@/hooks/use-user';
+import { Zap, Activity, TrendingUp, Wallet, ArrowUpRight, Globe, ShieldAlert } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function DashboardMain() {
-  const [stats, setStats] = useState({ active: 0, volume: 0, signals: 0 });
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const { user, profile, loading: userLoading } = useUser();
+  const [stats, setStats] = useState({ volume: 1.25, signals: 0 });
+  const [liveSignals, setLiveSignals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      setIsLoading(true);
-      try {
-        // Fetch Stats from DB
-        const { count: activeCount } = await supabase
-          .from('api_keys')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_active', true);
+    if (userLoading) return;
 
+    const fetchDashboardData = async () => {
+      try {
+        // Fetch real-time signals count for the last 24h
         const { count: signalCount } = await supabase
-          .from('trades')
+          .from('intel_logs')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'ghost')
           .gte('created_at', new Date(Date.now() - 86400000).toISOString());
 
-        // Fetch User's specific connected accounts for the HUD
-        const { data: userKeys } = await supabase
-          .from('api_keys')
-          .select('exchange_name, is_active')
-          .eq('is_active', true);
+        // Fetch latest 3 signals for the stream
+        const { data: recentSignals } = await supabase
+          .from('intel_logs')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(3);
 
-        setStats({ 
-          active: activeCount || 0, 
-          volume: 1.25, // Logic for volume can be summed from closed trades later
-          signals: signalCount || 0 
-        });
-
-        setAccounts(userKeys || []);
+        setStats(prev => ({ ...prev, signals: signalCount || 0 }));
+        setLiveSignals(recentSignals || []);
       } catch (error) {
-        console.error("Dashboard Sync Error:", error);
+        console.error("Sync Error:", error);
       } finally {
         setIsLoading(false);
       }
@@ -47,87 +41,140 @@ export default function DashboardMain() {
 
     fetchDashboardData();
 
-    // Real-time listener for new signals to update the Signal Count
     const channel = supabase
-      .channel('schema-db-changes')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'trades', filter: 'status=eq.ghost' }, 
-        () => fetchDashboardData()
-      )
+      .channel('dashboard-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'intel_logs' }, () => fetchDashboardData())
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [userLoading]);
+
+  // Derived state for the UI
+  const activeExchanges = [
+    { name: 'Bybit', active: !!profile?.bybit_key },
+    { name: 'Binance', active: !!profile?.binance_key },
+  ].filter(ex => ex.active);
 
   return (
-    <div className="p-8 space-y-8 bg-crypto-bg min-h-screen">
-      {/* Header HUD */}
-      <div className="flex justify-between items-end border-b border-crypto-border pb-6">
-        <div>
-          <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase">Command Terminal</h1>
-          <p className="text-[10px] text-gray-500 font-data">NODE: SG-01-EXECUTOR | {new Date().toLocaleTimeString()}</p>
+    <div className="p-8 space-y-10 bg-[#050505] min-h-screen font-mono">
+      
+      {/* 1. ARCHITECTURAL HUD HEADER */}
+      <div className="flex justify-between items-start border-b border-white/5 pb-8">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
+            Command<span className="text-crypto-gold">.Terminal</span>
+          </h1>
+          <div className="flex items-center gap-4">
+             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Dashboard</span>
+             <span className="h-1 w-1 rounded-full bg-gray-700" />
+             <span className="text-[10px] text-crypto-green font-bold uppercase tracking-widest animate-pulse">Node_Active: Lagos_NG</span>
+          </div>
         </div>
-        <div className="text-right">
-          <p className="text-[10px] font-bold text-gray-500 uppercase">Engine Status</p>
-          <p className="text-crypto-green font-data font-bold">SYNCED // 1.90ms</p>
+        <div className="text-right hidden md:block">
+          <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">Latency_Check</p>
+          <div className="flex items-center gap-2 justify-end">
+            <div className="h-[2px] w-8 bg-crypto-green/20 overflow-hidden relative">
+                <motion.div 
+                    animate={{ x: [-32, 32] }} 
+                    transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                    className="absolute inset-0 bg-crypto-green w-4" 
+                />
+            </div>
+            <p className="text-white font-black italic text-sm">1.90ms</p>
+          </div>
         </div>
       </div>
 
-      {/* Global Stats Grid */}
+      {/* 2. HIGH-IMPACT STATS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-crypto-card border border-crypto-border p-6 rounded-xl group hover:border-crypto-green transition-colors">
-          <div className="flex gap-2 items-center mb-4 text-gray-500 uppercase text-[10px] font-bold">
-            <Activity size={14} className="group-hover:text-crypto-green" /> Active Connections
-          </div>
-          <p className="text-4xl font-bold text-white">{stats.active}</p>
-        </div>
-        
-        <div className="bg-crypto-card border border-crypto-border p-6 rounded-xl group hover:border-white transition-colors">
-          <div className="flex gap-2 items-center mb-4 text-gray-500 uppercase text-[10px] font-bold">
-            <TrendingUp size={14} /> Total Volume (24h)
-          </div>
-          <p className="text-4xl font-bold text-white font-data">${stats.volume}M</p>
-        </div>
-
-        <div className="bg-crypto-card border border-crypto-border p-6 rounded-xl border-l-4 border-l-crypto-gold group hover:bg-crypto-gold/5 transition-all">
-          <div className="flex gap-2 items-center mb-4 text-crypto-gold uppercase text-[10px] font-bold">
-            <Zap size={14} /> Global Signals (24h)
-          </div>
-          <p className="text-4xl font-bold text-white">{stats.signals}</p>
-        </div>
+        {[
+          { label: "Active Nodes", value: activeExchanges.length, icon: Activity, color: "text-white" },
+          { label: "24h Volume", value: `$${stats.volume}M`, icon: TrendingUp, color: "text-white" },
+          { label: "BitTrader Signals", value: stats.signals, icon: Zap, color: "text-crypto-gold" },
+        ].map((stat, i) => (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            key={stat.label} 
+            className="bg-[#0A0A0A] border border-white/5 p-8 rounded-2xl relative overflow-hidden group"
+          >
+            <stat.icon className={`absolute -right-4 -bottom-4 w-24 h-24 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity`} />
+            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">{stat.label}</p>
+            <p className={`text-5xl font-black italic tracking-tighter ${stat.color}`}>{stat.value}</p>
+          </motion.div>
+        ))}
       </div>
 
-      {/* User Portfolio HUD */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-crypto-card border border-crypto-border rounded-2xl p-6">
-          <h3 className="text-xs font-black text-gray-500 uppercase mb-6 flex items-center gap-2">
-            <Wallet size={14} /> Connected Exchange Nodes
+      {/* 3. DUAL-STREAM VIEW */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Wallet / Accounts Card */}
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-3xl p-8 lg:col-span-1">
+          <h3 className="text-xs font-black text-white uppercase mb-8 flex items-center gap-3">
+            <Wallet size={16} className="text-crypto-gold" /> Connectivity_Vault
           </h3>
-          <div className="space-y-4">
-            {accounts.length > 0 ? accounts.map((acc, i) => (
-              <div key={i} className="flex justify-between items-center p-3 bg-crypto-bg border border-crypto-border rounded-lg">
+          <div className="space-y-3">
+            {activeExchanges.length > 0 ? activeExchanges.map((acc) => (
+              <div key={acc.name} className="flex justify-between items-center p-4 bg-white/[0.02] border border-white/5 rounded-xl group hover:border-white/10 transition-all">
                 <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-crypto-green animate-pulse"></div>
-                  <span className="text-sm font-bold text-white uppercase">{acc.exchange_name} Mainnet</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-crypto-green shadow-[0_0_8px_rgba(14,203,129,0.5)]"></div>
+                  <span className="text-xs font-black text-white uppercase italic">{acc.name} Mainnet</span>
                 </div>
-                <ArrowUpRight size={14} className="text-gray-600" />
+                <ArrowUpRight size={14} className="text-gray-700 group-hover:text-white transition-colors" />
               </div>
             )) : (
-              <p className="text-xs text-gray-600 italic">No active exchange connections found. Configure in Settings.</p>
+              <div className="p-6 border border-dashed border-white/10 rounded-xl text-center">
+                 <ShieldAlert className="mx-auto mb-2 text-gray-700" size={20} />
+                 <p className="text-[10px] text-gray-500 uppercase font-bold">No Encrypted Keys Found</p>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Live Execution Stream Placeholder */}
-        <div className="bg-crypto-card border border-crypto-border rounded-2xl overflow-hidden">
-          <div className="p-4 border-b border-crypto-border bg-black/20">
-             <span className="text-[10px] font-black uppercase text-gray-400">Live Intelligence Stream</span>
+        {/* Live Intelligence Stream (THE REASONING FEED) */}
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-3xl overflow-hidden lg:col-span-2">
+          <div className="p-5 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
+             <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+               <Globe size={14} className="animate-spin-slow" /> Raw_Intelligence_Stream
+             </span>
+             <span className="text-[9px] font-bold text-crypto-gold bg-crypto-gold/10 px-2 py-0.5 rounded">LIVE_DATA</span>
           </div>
-          <div className="p-12 text-center">
-            <div className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-crypto-gold mb-4"></div>
-            <p className="text-xs text-gray-600 italic font-data block tracking-widest">
-              WAITING FOR BLACK MARLIN SIGNALS...
-            </p>
+          
+          <div className="p-2">
+            <AnimatePresence mode="popLayout">
+              {liveSignals.length > 0 ? liveSignals.map((sig, i) => (
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  key={sig.id}
+                  className="p-6 border-b last:border-0 border-white/5 hover:bg-white/[0.01] transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-white italic">{sig.ticker}/USDT</span>
+                        <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase ${sig.sentiment === 'bullish' ? 'text-crypto-green bg-crypto-green/10' : 'text-crypto-red bg-crypto-red/10'}`}>
+                          {sig.sentiment}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-500 font-data line-clamp-1">{sig.reasoning}</p>
+                    </div>
+                    <div className="text-right">
+                       <p className="text-xs font-black text-white">{sig.confidence}%</p>
+                       <p className="text-[9px] text-gray-600 font-bold uppercase">Confidence</p>
+                    </div>
+                  </div>
+                </motion.div>
+              )) : (
+                <div className="p-20 text-center">
+                  <div className="inline-block animate-pulse text-gray-700">
+                    <Zap size={40} strokeWidth={1} />
+                  </div>
+                  <p className="text-[10px] text-gray-600 mt-4 tracking-[0.3em] uppercase">Monitoring Liquidity Shifts...</p>
+                </div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
