@@ -3,6 +3,12 @@ import { useUser } from '@/hooks/use-user';
 import { ShieldCheck, Zap, Cpu, Users, BarChart3 } from "lucide-react";
 import { redirect } from 'next/navigation';
 
+interface AdminStatCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ElementType; // This handles the Lucide icons we pass in
+}
+
 export default function AdminDashboard() {
   const { profile, loading } = useUser();
 
@@ -36,7 +42,7 @@ export default function AdminDashboard() {
   );
 }
 
-function AdminStatCard({ title, value, icon: Icon }) {
+function AdminStatCard({ title, value, icon: Icon }: AdminStatCardProps) {
   return (
     <div className="bg-black/40 border border-white/5 p-6 rounded-xl">
       <div className="flex justify-between items-center mb-2">
