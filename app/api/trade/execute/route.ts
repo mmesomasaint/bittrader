@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import ccxt from 'ccxt';
 
 export async function POST(req: Request) {
-  const ccxt = (await import('ccxt')).default;
   const supabase = await createClient();
   const { signalId, exchange: exchangeId } = await req.json();
 
