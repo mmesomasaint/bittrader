@@ -7,13 +7,22 @@ import { encrypt } from "@/lib/crypto";
 export async function updateApiKeys(formData: FormData) {
   const supabase = await createClient();
   
-  // 1. Get user session
+  // Get user session
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("UNAUTHORIZED");
   
-  // 2. Encrypt sensitive data
-  const encryptedKey = encrypt(formData.get('api_key'));
+  // Extract and Validate
+  const rawKey = formData.get('api_key');
+
+  // We check if it's a string and not null
+  if (typeof rawKey !== 'string' || !rawKey) {
+     return { success: false, error: "A valid API Key string is required." };
+  }
   
-  // 3. Upsert to public.api_keys
+  // Now TypeScript knows for 100% certainty that rawKey is a string
+  const encryptedKey = encrypt(rawKey);
+
+  // Upsert to public.api_keys
   const { error } = await supabase
     .from('api_keys')
     .upsert({ 
