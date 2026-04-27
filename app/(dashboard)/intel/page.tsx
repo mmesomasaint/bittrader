@@ -1,8 +1,10 @@
 "use client";
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/supabaseClient';
 import { BrainCircuit, Timer, BarChart, Eye, ChevronRight, Activity } from "lucide-react";
 import { UpgradeModal } from "@/components/system/UpgradeModal";
+import { toast } from "sonner";
 
 export default function IntelPage() {
   const [signals, setSignals] = useState<any[]>([]);
