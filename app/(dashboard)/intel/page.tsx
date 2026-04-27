@@ -83,7 +83,7 @@ export default function IntelPage() {
 
   return (
     <div className="h-screen flex flex-col bg-crypto-bg font-mono">
-      <UpgradeModal isOpen={showUpgrade} onClose{() => setShowUpgrade(false)} />
+      <UpgradeModal isOpen={showUpgrade} onClose={() => setShowUpgrade(false)} />
 
       {/* Top HUD */}
       <div className="p-4 border-b border-crypto-border flex justify-between items-center bg-black/20">
