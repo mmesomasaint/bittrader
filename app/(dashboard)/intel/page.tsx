@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export default function IntelPage() {
   const [signals, setSignals] = useState<any[]>([]);
   const [selectedSignal, setSelectedSignal] = useState<any>(null);
-  const [isexecuting, setIsExecuting] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
 
   const handleManualExecute = async () => {
