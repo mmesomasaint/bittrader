@@ -22,8 +22,10 @@ export async function POST(req: NextRequest) {
 
     if (error || !subscribers) return new Response("No subscribers found", { status: 200 });
 
-    const results = await Promise.all(subscribers.map(async (sub) => {
-    const isFreeTier = sub.profiles.tier === 'free';
+    const results = await Promise.all(subscribers.map(async (sub: any) => {
+    // Supabase returns joined tables as an array if the relationship isn't explicitly defined as single
+    const profile = Array.isArray(sub.profiles) ? sub.profiles[0] : sub.profiles;
+    const isFreeTier = profile?.tier === 'free';
     
     // 3. Record the Intelligence in the user's feed
     await supabase.from('intel_logs').insert({
@@ -35,22 +37,19 @@ export async function POST(req: NextRequest) {
     });
 
     if (isFreeTier) {
-      // Logic for Free Users: Just notify via Telegram, no trade
       return { user_id: sub.user_id, status: 'ghost_logged' };
     } else {
-      // Logic for Paid Users: Queue a trade job for the Execution Engine
-      // We insert into a 'trade_queue' table that your VPS listens to
       await supabase.from('trade_queue').insert({
         user_id: sub.user_id,
         ticker,
-        action: sentiment > 0 ? 'BUY' : 'SELL',
+        action: sentiment === 'bullish' || sentiment > 0 ? 'BUY' : 'SELL',
         weight: sub.weight
       });
       return { user_id: sub.user_id, status: 'trade_queued' };
     }
-    }));
+}));
 
-  return new NextResponse.json({ success: true, processed: results.length });
+  return NextResponse.json({ success: true, processed: results.length });
   
   } catch (error: any) {
     console.error("Error:", error.message);
