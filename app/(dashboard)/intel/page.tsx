@@ -2,11 +2,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/supabaseClient';
 import { BrainCircuit, Timer, BarChart, Eye, ChevronRight, Activity } from "lucide-react";
+import { UpgradeModal } from "@/components/system/UpgradeModal";
 
 export default function IntelPage() {
   const [signals, setSignals] = useState<any[]>([]);
   const [selectedSignal, setSelectedSignal] = useState<any>(null);
   const [isexecuting, setIsExecuting] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   const handleManualExecute = async () => {
     if (!selectedSignal) return;
@@ -81,6 +83,7 @@ export default function IntelPage() {
 
   return (
     <div className="h-screen flex flex-col bg-crypto-bg font-mono">
+    	<UpgradeModal isOpen={showUpgrade} onClose{() => setshowUpgrade(false)} />
       {/* Top HUD */}
       <div className="p-4 border-b border-crypto-border flex justify-between items-center bg-black/20">
         <div className="flex items-center gap-3">
