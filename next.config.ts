@@ -1,16 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // In Next.js 15, this is stable and renamed to serverExternalPackages
+  // This is the modern replacement for the webpack fix
+  // It forces Turbopack to ignore CCXT during bundling
   serverExternalPackages: ["ccxt"],
   
-  // Hard-override the webpack resolver for protobufjs
-  webpack: (config) => {
-    config.externals.push({
-      "protobufjs/minimal": "commonjs protobufjs/minimal",
-    });
-    return config;
-  },
+  // This satisfies the Vercel requirement to explicitly choose a path
+  turbopack: {}, 
 };
 
 export default nextConfig;
