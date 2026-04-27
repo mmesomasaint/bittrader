@@ -1,3 +1,9 @@
+"use server";
+
+import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+import { encrypt } from "@/lib/crypto";
+
 export async function updateApiKeys(formData: FormData) {
   const supabase = await createClient();
   
@@ -16,5 +22,13 @@ export async function updateApiKeys(formData: FormData) {
       exchange_name: 'bybit'
     });
 
-  if (!error) revalidatePath('/dashboard/settings');
+
+  if (error) {
+    console.error("Vault Update Error:", error.message);
+    return { success: false, error: error.message };
+  }
+
+  // 4. Clear cache to show updated status
+  revalidatePath('/dashboard/settings');
+  return { success: true };
 }
