@@ -69,14 +69,14 @@ export default function MultiExchangeSettings() {
                 label="API Key" 
                 value={ex.id === 'bybit' ? keys.bybit_key : keys.binance_key}
                 disabled={!isPro}
-                onChange={(val) => setKeys({...keys, [`${ex.id}_key`]: val})}
+                onChange={(val: string) => setKeys({...keys, [`${ex.id}_key`]: val})}
               />
               <KeyInput 
                 label="Secret Key" 
                 value={ex.id === 'bybit' ? keys.bybit_secret : keys.binance_secret}
                 disabled={!isPro}
                 type="password"
-                onChange={(val) => setKeys({...keys, [`${ex.id}_secret`]: val})}
+                onChange={(val: string) => setKeys({...keys, [`${ex.id}_secret`]: val})}
               />
             </div>
 
@@ -140,7 +140,15 @@ export default function MultiExchangeSettings() {
   );
 }
 
-function KeyInput({ label, value, onChange, disabled, type = "text" }: any) {
+interface KeyInputProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  disabled: boolean;
+  type?: string;
+}
+
+function KeyInput({ label, value, onChange, disabled, type = "text" }: KeyInputProps) {
   return (
     <div className="space-y-1.5">
       <label className="text-[8px] md:text-[9px] text-gray-600 font-bold uppercase tracking-widest">{label}</label>
