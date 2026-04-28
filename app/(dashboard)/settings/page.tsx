@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ShieldCheck, Globe, Lock, Send, BellRing, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
@@ -14,6 +15,7 @@ const EXCHANGES = [
 
 export default function MultiExchangeSettings() {
   const supabase = createClient();
+  const router = useRouter();
   const { user, profile, isPro, loading } = useUser();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [telegramId, setTelegramId] = useState("");
