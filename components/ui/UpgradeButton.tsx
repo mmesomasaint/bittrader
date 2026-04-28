@@ -10,9 +10,8 @@ export function UpgradeButton() {
   const [isInitializing, setIsInitializing] = useState(false);
 
   const handlePayment = () => {
-    // Safety check: Don't initialize if user data hasn't loaded
     if (!user?.email || !user?.id) {
-      toast.error("AUTH_ERROR", { description: "Session not found. Please re-login." });
+      toast.error("AUTH_ERROR");
       return;
     }
 
@@ -24,41 +23,33 @@ export function UpgradeButton() {
       paystack.newTransaction({
         key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
         email: user.email,
-        // If using a plan, remove 'amount' or ensure it matches exactly.
-        // For a one-time payment of 125,000 NGN:
-        amount: 125000 * 100, 
-        // FIX: The property is 'plan', not 'paymentRequest'
-        plan: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE || "", 
+        plan: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE, 
         metadata: {
           custom_fields: [
             {
               display_name: "User ID",
               variable_name: "user_id",
-              value: user.id // Essential for your Supabase Webhook!
+              value: user.id
             }
           ]
         },
         onSuccess: (transaction: any) => {
           setIsInitializing(false);
-          toast.success("SYSTEM_AUTHORIZED", {
-            description: "Elite access granted.",
-            icon: <CheckCircle2 className="text-crypto-green" size={16} />,
-          });
+          toast.success("SYSTEM_AUTHORIZED");
           window.location.href = "/dashboard?payment=success";
         },
         onCancel: () => {
-          setIsInitializing(false);
-          toast.info("PAYMENT_CANCELLED");
+          console.error("Payment interupted or cancelled");
+          toast.error("PAYMENT CANCELLED");
         },
         onError: (error: any) => {
           setIsInitializing(false);
-          console.error("Paystack Initialization Error:", error);
-          toast.error("GATEWAY_ERROR", { description: "Could not connect to Paystack." });
+          console.error("Paystack SDK Error:", error);
+          toast.error("GATEWAY_ERROR");
         }
       });
     } catch (err) {
       setIsInitializing(false);
-      console.error("Critical Crash:", err);
       toast.error("INITIALIZATION_FAILED");
     }
   };
