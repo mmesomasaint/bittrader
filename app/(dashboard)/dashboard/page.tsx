@@ -118,17 +118,21 @@ export default function DashboardMain() {
           </h3>
           <div className="space-y-3">
             {activeExchanges.length > 0 ? activeExchanges.map((acc) => (
-              <div key={acc.name} className="flex justify-between items-center p-3 md:p-4 bg-white/[0.02] border border-white/5 rounded-xl group hover:border-white/10 transition-all">
+              <div key={acc.name} className="flex justify-between items-center p-3 md:p-4 bg-white/[0.02] border border-white/5 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-crypto-green shadow-[0_0_8px_rgba(14,203,129,0.5)]"></div>
-                  <span className="text-[10px] md:text-xs font-black text-white uppercase italic">{acc.name}</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-crypto-green shadow-[0_0_8px_rgba(14,203,129,0.5)]" />
+                  <span className="text-[10px] md:text-xs font-black text-white uppercase italic">
+                    {acc.name} <span className="text-gray-600 ml-2">v1.0_Connected</span>
+                  </span>
                 </div>
-                <ArrowUpRight size={12} className="text-gray-700 group-hover:text-white transition-colors" />
+                <div className="text-[8px] text-crypto-green font-bold border border-crypto-green/20 px-2 py-0.5 rounded">
+                  ENCRYPTED
+                </div>
               </div>
             )) : (
               <div className="p-6 border border-dashed border-white/10 rounded-xl text-center">
                  <ShieldAlert className="mx-auto mb-2 text-gray-700" size={18} />
-                 <p className="text-[9px] text-gray-500 uppercase font-bold">Vault Empty</p>
+                 <p className="text-[9px] text-gray-500 uppercase font-bold">Action Required: Setup Vault</p>
               </div>
             )}
           </div>
