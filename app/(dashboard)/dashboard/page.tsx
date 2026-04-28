@@ -56,22 +56,24 @@ export default function DashboardMain() {
   ].filter(ex => ex.active);
 
   return (
-    <div className="p-8 space-y-10 bg-[#050505] min-h-screen font-mono">
+    <div className="p-4 md:p-8 space-y-6 md:space-y-10 bg-[#050505] min-h-screen font-mono pb-24 md:pb-8">
       
       {/* 1. ARCHITECTURAL HUD HEADER */}
-      <div className="flex justify-between items-start border-b border-white/5 pb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start border-b border-white/5 pb-6 md:pb-8 gap-4">
         <div className="space-y-1">
-          <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
+          <h1 className="text-2xl md:text-4xl font-black text-white italic tracking-tighter uppercase leading-none">
             Command<span className="text-crypto-gold">.Terminal</span>
           </h1>
-          <div className="flex items-center gap-4">
-             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Dashboard</span>
-             <span className="h-1 w-1 rounded-full bg-gray-700" />
-             <span className="text-[10px] text-crypto-green font-bold uppercase tracking-widest animate-pulse">Node_Active: Lagos_NG</span>
+          <div className="flex flex-wrap items-center gap-2 md:gap-4">
+             <span className="text-[9px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest">Dashboard</span>
+             <span className="hidden md:block h-1 w-1 rounded-full bg-gray-700" />
+             <span className="text-[9px] md:text-[10px] text-crypto-green font-bold uppercase tracking-widest animate-pulse">Node: Lagos_NG</span>
           </div>
         </div>
-        <div className="text-right hidden md:block">
-          <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">Latency_Check</p>
+        
+        {/* Latency - Hidden on small mobile, shown on md+ */}
+        <div className="text-left md:text-right flex md:block items-center gap-4">
+          <p className="text-[9px] md:text-[10px] font-black text-gray-600 uppercase tracking-widest md:mb-1">Latency_Check</p>
           <div className="flex items-center gap-2 justify-end">
             <div className="h-[2px] w-8 bg-crypto-green/20 overflow-hidden relative">
                 <motion.div 
@@ -80,98 +82,98 @@ export default function DashboardMain() {
                     className="absolute inset-0 bg-crypto-green w-4" 
                 />
             </div>
-            <p className="text-white font-black italic text-sm">1.90ms</p>
+            <p className="text-white font-black italic text-xs md:text-sm">1.90ms</p>
           </div>
         </div>
       </div>
 
       {/* 2. HIGH-IMPACT STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {[
           { label: "Active Nodes", value: activeExchanges.length, icon: Activity, color: "text-white" },
           { label: "24h Volume", value: `$${stats.volume}M`, icon: TrendingUp, color: "text-white" },
-          { label: "BitTrader Signals", value: stats.signals, icon: Zap, color: "text-crypto-gold" },
+          { label: "Signals", value: stats.signals, icon: Zap, color: "text-crypto-gold" },
         ].map((stat, i) => (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
             key={stat.label} 
-            className="bg-[#0A0A0A] border border-white/5 p-8 rounded-2xl relative overflow-hidden group"
+            className="bg-[#0A0A0A] border border-white/5 p-5 md:p-8 rounded-2xl relative overflow-hidden group"
           >
-            <stat.icon className={`absolute -right-4 -bottom-4 w-24 h-24 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity`} />
-            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">{stat.label}</p>
-            <p className={`text-5xl font-black italic tracking-tighter ${stat.color}`}>{stat.value}</p>
+            <stat.icon className={`absolute -right-4 -bottom-4 w-16 md:w-24 h-16 md:h-24 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity`} />
+            <p className="text-[9px] md:text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2 md:mb-4">{stat.label}</p>
+            <p className={`text-3xl md:text-5xl font-black italic tracking-tighter ${stat.color}`}>{stat.value}</p>
           </motion.div>
         ))}
       </div>
 
       {/* 3. DUAL-STREAM VIEW */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         
         {/* Wallet / Accounts Card */}
-        <div className="bg-[#0A0A0A] border border-white/5 rounded-3xl p-8 lg:col-span-1">
-          <h3 className="text-xs font-black text-white uppercase mb-8 flex items-center gap-3">
-            <Wallet size={16} className="text-crypto-gold" /> Connectivity_Vault
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-2xl md:rounded-3xl p-5 md:p-8 lg:col-span-1">
+          <h3 className="text-[10px] md:text-xs font-black text-white uppercase mb-6 md:mb-8 flex items-center gap-3">
+            <Wallet size={14} className="text-crypto-gold" /> Connectivity_Vault
           </h3>
           <div className="space-y-3">
             {activeExchanges.length > 0 ? activeExchanges.map((acc) => (
-              <div key={acc.name} className="flex justify-between items-center p-4 bg-white/[0.02] border border-white/5 rounded-xl group hover:border-white/10 transition-all">
+              <div key={acc.name} className="flex justify-between items-center p-3 md:p-4 bg-white/[0.02] border border-white/5 rounded-xl group hover:border-white/10 transition-all">
                 <div className="flex items-center gap-3">
                   <div className="w-1.5 h-1.5 rounded-full bg-crypto-green shadow-[0_0_8px_rgba(14,203,129,0.5)]"></div>
-                  <span className="text-xs font-black text-white uppercase italic">{acc.name} Mainnet</span>
+                  <span className="text-[10px] md:text-xs font-black text-white uppercase italic">{acc.name}</span>
                 </div>
-                <ArrowUpRight size={14} className="text-gray-700 group-hover:text-white transition-colors" />
+                <ArrowUpRight size={12} className="text-gray-700 group-hover:text-white transition-colors" />
               </div>
             )) : (
               <div className="p-6 border border-dashed border-white/10 rounded-xl text-center">
-                 <ShieldAlert className="mx-auto mb-2 text-gray-700" size={20} />
-                 <p className="text-[10px] text-gray-500 uppercase font-bold">No Encrypted Keys Found</p>
+                 <ShieldAlert className="mx-auto mb-2 text-gray-700" size={18} />
+                 <p className="text-[9px] text-gray-500 uppercase font-bold">Vault Empty</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Live Intelligence Stream (THE REASONING FEED) */}
-        <div className="bg-[#0A0A0A] border border-white/5 rounded-3xl overflow-hidden lg:col-span-2">
-          <div className="p-5 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
-             <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
-               <Globe size={14} className="animate-spin-slow" /> Raw_Intelligence_Stream
+        {/* Live Intelligence Stream */}
+        <div className="bg-[#0A0A0A] border border-white/5 rounded-2xl md:rounded-3xl overflow-hidden lg:col-span-2">
+          <div className="p-4 md:p-5 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
+             <span className="text-[9px] md:text-[10px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-2">
+               <Globe size={12} className="animate-spin-slow" /> Intelligence_Stream
              </span>
-             <span className="text-[9px] font-bold text-crypto-gold bg-crypto-gold/10 px-2 py-0.5 rounded">LIVE_DATA</span>
+             <span className="text-[8px] md:text-[9px] font-bold text-crypto-gold bg-crypto-gold/10 px-2 py-0.5 rounded">LIVE</span>
           </div>
           
           <div className="p-2">
             <AnimatePresence mode="popLayout">
-              {liveSignals.length > 0 ? liveSignals.map((sig, i) => (
+              {liveSignals.length > 0 ? liveSignals.map((sig) => (
                 <motion.div 
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   key={sig.id}
-                  className="p-6 border-b last:border-0 border-white/5 hover:bg-white/[0.01] transition-colors"
+                  className="p-4 md:p-6 border-b last:border-0 border-white/5 hover:bg-white/[0.01] transition-colors"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-1">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="space-y-1 overflow-hidden">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-black text-white italic">{sig.ticker}/USDT</span>
-                        <span className={`text-[9px] px-2 py-0.5 rounded font-black uppercase ${sig.sentiment === 'bullish' ? 'text-crypto-green bg-crypto-green/10' : 'text-crypto-red bg-crypto-red/10'}`}>
+                        <span className="text-xs md:text-sm font-black text-white italic truncate">{sig.ticker}/USDT</span>
+                        <span className={`text-[8px] md:text-[9px] px-2 py-0.5 rounded font-black uppercase ${sig.sentiment === 'bullish' ? 'text-crypto-green bg-crypto-green/10' : 'text-crypto-red bg-crypto-red/10'}`}>
                           {sig.sentiment}
                         </span>
                       </div>
-                      <p className="text-[11px] text-gray-500 font-data line-clamp-1">{sig.reasoning}</p>
+                      <p className="text-[10px] md:text-[11px] text-gray-500 font-data line-clamp-2 md:line-clamp-1">{sig.reasoning}</p>
                     </div>
-                    <div className="text-right">
-                       <p className="text-xs font-black text-white">{sig.confidence}%</p>
-                       <p className="text-[9px] text-gray-600 font-bold uppercase">Confidence</p>
+                    <div className="text-right flex-shrink-0">
+                        <p className="text-xs md:text-sm font-black text-white">{sig.confidence}%</p>
+                        <p className="text-[8px] md:text-[9px] text-gray-600 font-bold uppercase">Conf.</p>
                     </div>
                   </div>
                 </motion.div>
               )) : (
-                <div className="p-20 text-center">
+                <div className="p-10 md:p-20 text-center">
                   <div className="inline-block animate-pulse text-gray-700">
-                    <Zap size={40} strokeWidth={1} />
+                    <Zap size={32} strokeWidth={1} />
                   </div>
-                  <p className="text-[10px] text-gray-600 mt-4 tracking-[0.3em] uppercase">Monitoring Liquidity Shifts...</p>
+                  <p className="text-[9px] text-gray-600 mt-4 tracking-[0.3em] uppercase italic">Monitoring Flows...</p>
                 </div>
               )}
             </AnimatePresence>
