@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ShieldCheck, Trash2, Globe, Lock, Send, BellRing } from "lucide-react";
+import { ShieldCheck, Globe, Lock, Send, BellRing, Info } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
-import { createClient } from "@/lib/supabase/client"; // Use the client-side helper
+import { createClient } from "@/lib/supabase/client";
 import { UpgradeModal } from "@/components/system/UpgradeModal";
 
 const EXCHANGES = [
@@ -14,20 +14,11 @@ const EXCHANGES = [
 
 export default function MultiExchangeSettings() {
   const supabase = createClient();
-  const { user, profile, isPro, loading } = useUser(); // Extract user and profile here
-  
+  const { user, profile, isPro, loading } = useUser();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [telegramId, setTelegramId] = useState("");
-  
-  // State for API Keys
-  const [keys, setKeys] = useState({
-    bybit_key: "",
-    bybit_secret: "",
-    binance_key: "",
-    binance_secret: ""
-  });
+  const [keys, setKeys] = useState({ bybit_key: "", bybit_secret: "", binance_key: "", binance_secret: "" });
 
-  // Synchronize state when profile loads
   useEffect(() => {
     if (profile) {
       setTelegramId(profile.telegram_chat_id || "");
@@ -40,111 +31,61 @@ export default function MultiExchangeSettings() {
     }
   }, [profile]);
 
-  if (loading) {
-    return <div className="p-8 text-gray-500 font-mono animate-pulse uppercase text-xs">Authenticating_Session...</div>;
-  }
-
-  if (!user) {
-    return <div className="p-8 text-crypto-red font-mono">Error: Unauthorized Access.</div>;
-  }
+  if (loading) return <div className="p-8 text-[10px] text-gray-500 font-mono animate-pulse uppercase">Authenticating_Vault...</div>;
 
   const handleSaveKeys = async (exchangeId: string) => {
     if (!isPro) return setShowUpgrade(true);
-
     const updates = exchangeId === 'bybit' 
       ? { bybit_key: keys.bybit_key, bybit_secret: keys.bybit_secret }
       : { binance_key: keys.binance_key, binance_secret: keys.binance_secret };
 
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id);
-
-    if (error) {
-      toast.error(`${exchangeId.toUpperCase()}_SYNC_ERROR`, { description: error.message });
-    } else {
-      toast.success(`${exchangeId.toUpperCase()}_VAULT_UPDATED`, { description: "Credentials encrypted and stored." });
-    }
-  };
-
-  const handleSaveTelegram = async () => {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ telegram_chat_id: telegramId })
-      .eq('id', user.id);
-
-    if (error) {
-      toast.error("TELEGRAM_SYNC_FAILED", { description: error.message });
-    } else {
-      toast.success("TELEGRAM_AUTHORIZED", { description: "Alerts routed to your ID." });
-    }
-  };
-
-  const handleProtectedAction = (e?: any) => {
-    if (!isPro) {
-      if (e) e.preventDefault();
-      setShowUpgrade(true);
-      return false;
-    }
-    return true;
+    const { error } = await supabase.from('profiles').update(updates).eq('id', user?.id);
+    if (error) toast.error("SYNC_ERROR");
+    else toast.success("VAULT_UPDATED");
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-10">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 md:space-y-10 pb-24 lg:pb-8">
       <UpgradeModal isOpen={showUpgrade} onClose={() => setShowUpgrade(false)} />
 
       <header className="border-b border-crypto-border pb-6">
-        <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase">Exchange Vault</h1>
-        <p className="text-sm text-gray-500 font-data">Manage institutional-grade API connections.</p>
+        <h1 className="text-2xl md:text-3xl font-black text-white italic uppercase tracking-tighter">Exchange Vault</h1>
+        <p className="text-[10px] md:text-sm text-gray-500 font-data">Manage institution-grade API keys.</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Responsive Grid: 1 col on mobile, 2 on tablet+ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
         {EXCHANGES.map((ex) => (
-          <div key={ex.id} className="bg-crypto-card border border-crypto-border rounded-2xl overflow-hidden flex flex-col relative">
-            {!isPro && !loading && (
-              <div className="absolute top-2 right-2 text-gray-600">
-                <Lock size={14} />
-              </div>
-            )}
+          <div key={ex.id} className="bg-crypto-card border border-crypto-border rounded-xl overflow-hidden flex flex-col relative">
+            {!isPro && <div className="absolute top-3 right-3 text-gray-600"><Lock size={14} /></div>}
 
-            <div className={`p-4 ${ex.bg} border-b border-crypto-border flex justify-between items-center`}>
-              <div className="flex items-center gap-2">
-                <Globe size={16} className={ex.color} />
-                <span className={`font-bold uppercase text-xs ${ex.color}`}>{ex.name} PERPETUALS</span>
-              </div>
+            <div className={`p-4 ${ex.bg} border-b border-crypto-border flex items-center gap-2`}>
+              <Globe size={16} className={ex.color} />
+              <span className={`font-bold uppercase text-[10px] ${ex.color}`}>{ex.name} PERPETUALS</span>
             </div>
 
-            <div className="p-6 flex-1 space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] text-gray-600 font-bold uppercase">API Key</label>
-                <input 
-                  disabled={!isPro}
-                  type="text" 
-                  value={ex.id === 'bybit' ? keys.bybit_key : keys.binance_key}
-                  onChange={(e) => setKeys({...keys, [`${ex.id}_key`]: e.target.value})}
-                  className="w-full bg-crypto-bg border border-crypto-border p-3 rounded-lg text-white font-data text-sm focus:border-crypto-gold outline-none disabled:opacity-50 cursor-not-allowed"
-                  placeholder={isPro ? "Paste Key..." : "Upgrade Required"}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] text-gray-600 font-bold uppercase">Secret Key</label>
-                <input 
-                  disabled={!isPro}
-                  type="password" 
-                  value={ex.id === 'bybit' ? keys.bybit_secret : keys.binance_secret}
-                  onChange={(e) => setKeys({...keys, [`${ex.id}_secret`]: e.target.value})}
-                  className="w-full bg-crypto-bg border border-crypto-border p-3 rounded-lg text-white font-data text-sm focus:border-crypto-gold outline-none disabled:opacity-50 cursor-not-allowed"
-                  placeholder="••••••••••••••••"
-                />
-              </div>
+            <div className="p-5 md:p-6 space-y-4">
+              <KeyInput 
+                label="API Key" 
+                value={ex.id === 'bybit' ? keys.bybit_key : keys.binance_key}
+                disabled={!isPro}
+                onChange={(val) => setKeys({...keys, [`${ex.id}_key`]: val})}
+              />
+              <KeyInput 
+                label="Secret Key" 
+                value={ex.id === 'bybit' ? keys.bybit_secret : keys.binance_secret}
+                disabled={!isPro}
+                type="password"
+                onChange={(val) => setKeys({...keys, [`${ex.id}_secret`]: val})}
+              />
             </div>
 
-            <div className="p-4 bg-black/20 flex gap-2">
+            <div className="p-4 bg-black/20">
               <button 
                 onClick={() => handleSaveKeys(ex.id)}
-                className="flex-1 bg-white text-black font-black py-3 rounded-lg hover:bg-gray-200 transition text-sm uppercase tracking-tighter"
+                className="w-full bg-white text-black font-black py-4 rounded-lg hover:bg-gray-200 transition text-[10px] md:text-xs uppercase"
               >
-                UPDATE {ex.name}
+                UPDATE {ex.name} CONNECTION
               </button>
             </div>
           </div>
@@ -152,35 +93,52 @@ export default function MultiExchangeSettings() {
       </div>
 
       {/* Telegram Card */}
-      <div className="bg-crypto-card border border-[#24A1DE]/20 rounded-2xl overflow-hidden flex flex-col">
-        <div className="p-4 bg-[#24A1DE]/10 border-b border-crypto-border flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Send size={16} className="text-[#24A1DE]" />
-            <span className="font-bold uppercase text-xs text-[#24A1DE]">Telegram Alert Channel</span>
-          </div>
+      <div className="bg-crypto-card border border-[#24A1DE]/20 rounded-xl overflow-hidden">
+        <div className="p-4 bg-[#24A1DE]/10 border-b border-crypto-border flex items-center gap-2">
+          <Send size={16} className="text-[#24A1DE]" />
+          <span className="font-bold uppercase text-[10px] text-[#24A1DE]">Telegram Alert Route</span>
         </div>
-        <div className="p-6 space-y-4">
-          <div className="flex items-start gap-4 p-4 bg-black/20 rounded-xl border border-white/5">
-            <BellRing className="text-crypto-gold shrink-0" size={20} />
-            <p className="text-[10px] text-gray-500 leading-relaxed">
-              Message <span className="text-white">@BitTradrrBot</span> and type <span className="text-crypto-gold">/id</span> to get your Chat ID.
+        <div className="p-5 md:p-6 space-y-4">
+          <div className="flex items-start gap-3 p-4 bg-black/20 rounded-xl border border-white/5">
+            <Info className="text-crypto-gold shrink-0" size={16} />
+            <p className="text-[9px] text-gray-500 leading-relaxed">
+              Find <span className="text-white">@BitTradrrBot</span> to retrieve your <span className="text-crypto-gold italic">/id</span>.
             </p>
           </div>
           <input 
             type="text" 
             value={telegramId}
             onChange={(e) => setTelegramId(e.target.value)}
-            className="w-full bg-crypto-bg border border-crypto-border p-3 rounded-lg text-white font-mono text-sm outline-none focus:border-[#24A1DE]"
-            placeholder="Enter Chat ID..."
+            className="w-full bg-crypto-bg border border-crypto-border p-4 rounded-lg text-white font-mono text-xs outline-none focus:border-[#24A1DE]"
+            placeholder="Chat ID..."
           />
           <button 
-            onClick={handleSaveTelegram}
-            className="w-full bg-[#24A1DE] text-white font-black py-3 rounded-lg uppercase text-xs"
+            onClick={async () => {
+              const { error } = await supabase.from('profiles').update({ telegram_chat_id: telegramId }).eq('id', user?.id);
+              if (!error) toast.success("TELEGRAM_LINKED");
+            }}
+            className="w-full bg-[#24A1DE] text-white font-black py-4 rounded-lg uppercase text-[10px] tracking-widest"
           >
-            Sync Telegram
+            Sync Channel
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function KeyInput({ label, value, onChange, disabled, type = "text" }: any) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[8px] md:text-[9px] text-gray-600 font-bold uppercase tracking-widest">{label}</label>
+      <input 
+        disabled={disabled}
+        type={type} 
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-crypto-bg border border-crypto-border p-4 rounded-lg text-white font-data text-xs focus:border-crypto-gold outline-none disabled:opacity-30 transition-all"
+        placeholder={disabled ? "PRO_REQUIRED" : `Enter ${label}...`}
+      />
     </div>
   );
 }
