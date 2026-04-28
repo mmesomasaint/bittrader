@@ -20,33 +20,33 @@ export function UpgradeButton() {
     try {
       const paystack = new PaystackPop();
       
-          paystack.newTransaction({
-            key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-            email: user?.email || "",
-            amount: 125000 * 100, // 125,000 NGN in kobo
-            paymentRequest: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE, // Ensure this plan exists in your Paystack dashboard
-            onSuccess: (transaction: any) => {
-              setIsInitializing(false);
-              toast.success("SYSTEM_AUTHORIZED", {
-                description: "Pro account initialized",
-                icon: <CheckCircle2 className="text-crypto-green" size={16} />,
-              });
-      
-              // The webhook handles the tier upgrade; we just show a success state
-              window.location.href = "/dashboard?payment=success";
-            },
-            onCancel: () => {
-              setIsInitializing(false);
-              toast.error("PAYMENT_CANCELLED", {
-                description: "Your payment was cancelled.",
-                icon: <AlertCircle className="text-crypto-red" size={16} />,
-              });
-            },
-            onError: (error: any) => {
-              setIsInitializing(false);
-              console.error("Paystack Error:", error);
-            }
+      paystack.newTransaction({
+        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+        email: user?.email || "",
+        amount: 125000 * 100, // 125,000 NGN in kobo
+        paymentRequest: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE, // Ensure this plan exists in your Paystack dashboard
+        onSuccess: (transaction: any) => {
+          setIsInitializing(false);
+          toast.success("SYSTEM_AUTHORIZED", {
+            description: "Pro account initialized",
+            icon: <CheckCircle2 className="text-crypto-green" size={16} />,
           });
+  
+          // The webhook handles the tier upgrade; we just show a success state
+          window.location.href = "/dashboard?payment=success";
+        },
+        onCancel: () => {
+          setIsInitializing(false);
+          toast.error("PAYMENT_CANCELLED", {
+            description: "Your payment was cancelled.",
+            icon: <AlertCircle className="text-crypto-red" size={16} />,
+          });
+        },
+        onError: (error: any) => {
+          setIsInitializing(false);
+          console.error("Paystack Error:", error);
+        }
+      });
     } catch (err) {
       setIsInitializing(false);
       toast.error("INITIALIZATION_FAILED");
