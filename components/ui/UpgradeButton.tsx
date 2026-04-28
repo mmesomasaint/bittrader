@@ -20,34 +20,33 @@ export function UpgradeButton() {
     try {
       const paystack = new PaystackPop();
       
-      paystack.newTransaction({
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-        email: user.email,
-        plan: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE, 
-        metadata: {
-          custom_fields: [
-            {
-              display_name: "User ID",
-              variable_name: "user_id",
-              value: user.id
+          paystack.newTransaction({
+            key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+            email: user?.email || "",
+            amount: 125000 * 100, // 125,000 NGN in kobo
+            paymentRequest: process.env.NEXT_PUBLIC_PAYSTACK_PLAN_CODE, // Ensure this plan exists in your Paystack dashboard
+            onSuccess: (transaction: any) => {
+              setIsInitializing(false);
+              toast.success("SYSTEM_AUTHORIZED", {
+                description: "Pro account initialized",
+                icon: <CheckCircle2 className="text-crypto-green" size={16} />,
+              });
+      
+              // The webhook handles the tier upgrade; we just show a success state
+              window.location.href = "/dashboard?payment=success";
+            },
+            onCancel: () => {
+              setIsInitializing(false);
+              toast.error("PAYMENT_CANCELLED", {
+                description: "Your payment was cancelled.",
+                icon: <AlertCircle className="text-crypto-red" size={16} />,
+              });
+            },
+            onError: (error: any) => {
+              setIsInitializing(false);
+              console.error("Paystack Error:", error);
             }
-          ]
-        },
-        onSuccess: (transaction: any) => {
-          setIsInitializing(false);
-          toast.success("SYSTEM_AUTHORIZED");
-          window.location.href = "/dashboard?payment=success";
-        },
-        onCancel: () => {
-          console.error("Payment interupted or cancelled");
-          toast.error("PAYMENT CANCELLED");
-        },
-        onError: (error: any) => {
-          setIsInitializing(false);
-          console.error("Paystack SDK Error:", error);
-          toast.error("GATEWAY_ERROR");
-        }
-      });
+          });
     } catch (err) {
       setIsInitializing(false);
       toast.error("INITIALIZATION_FAILED");
