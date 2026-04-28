@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import PaystackPop from "@paystack/inline-js";
 import { useUser } from "@/hooks/use-user";
 import { Loader2, Zap, CheckCircle2, AlertCircle } from "lucide-react";
@@ -9,7 +8,6 @@ import { toast } from "sonner";
 export function UpgradeButton() {
   const { user } = useUser();
   const [isInitializing, setIsInitializing] = useState(false);
-  const router = useRouter();
 
   const handlePayment = () => {
     if (!user?.email || !user?.id) {
@@ -50,8 +48,7 @@ export function UpgradeButton() {
                 icon: <CheckCircle2 className="text-crypto-green" size={16} /> 
               });
               // Hard refresh to ensure useUser hooks get the fresh tier
-              router.push("/dashboard?upgrade=success");
-              router.refresh();
+              window.location.href = "/dashboard?upgrade=success";
             } else {
               throw new Error("Verification failed");
             }
@@ -60,8 +57,7 @@ export function UpgradeButton() {
               id: "verify-payment",
               description: "Payment successful, but tier sync is taking a moment. Please refresh." 
             });
-            router.push("/dashboard");
-            router.refresh();
+            window.location.href = "/dashboard";
           } finally {
             setIsInitializing(false);
           }
