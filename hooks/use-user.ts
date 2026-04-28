@@ -11,22 +11,47 @@ export function useUser() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      setUser(authUser);
 
-      if (user) {
-        const { data: profile } = await supabase
+      if (authUser) {
+        // 1. Initial Fetch
+        const { data: initialProfile } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', authUser.id)
           .single();
-        setProfile(profile);
+        
+        setProfile(initialProfile);
+
+        // 2. Real-time Subscription
+        // This listens for any UPDATE to YOUR row in the profiles table
+        const channel = supabase
+          .channel(`profile-updates-${authUser.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'profiles',
+              filter: `id=eq.${authUser.id}`,
+            },
+            (payload) => {
+              console.log("Profile Sync Active: New Tier Detected", payload.new.tier);
+              setProfile(payload.new);
+            }
+          )
+          .subscribe();
+
+        return () => {
+          supabase.removeChannel(channel);
+        };
       }
       setLoading(false);
     };
 
     fetchData();
-  }, []);
+  }, []); // Re-runs if auth state changes
 
   const isPro = profile?.tier === 'pro' || profile?.tier === 'elite';
 
