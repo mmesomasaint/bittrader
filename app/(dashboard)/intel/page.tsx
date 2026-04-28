@@ -84,7 +84,9 @@ export default function IntelPage() {
       {/* Top HUD */}
       <div className="p-3 md:p-4 border-b border-crypto-border flex justify-between items-center bg-black/20">
         <div className="flex items-center gap-2 md:gap-3">
-          <BrainCircuit className="text-crypto-gold animate-pulse shrink-0" size={16} md:size={18} />
+          <BrainCircuit 
+            className="text-crypto-gold animate-pulse shrink-0 w-4 h-4 md:w-[18px] md:h-[18px]" 
+          />
           <h1 className="text-[10px] md:text-sm font-black text-white tracking-widest uppercase truncate">Intelligence_Core</h1>
         </div>
         <div className="hidden sm:flex text-[9px] md:text-[10px] text-gray-500 gap-4 font-data">
