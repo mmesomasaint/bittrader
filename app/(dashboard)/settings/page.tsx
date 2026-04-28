@@ -123,6 +123,19 @@ export default function MultiExchangeSettings() {
           </button>
         </div>
       </div>
+
+      {/* Mobile-Only Sign Out Section */}
+      <div className="lg:hidden pt-10 pb-20">
+        <button 
+          onClick={async () => {
+            await supabase.auth.signOut();
+            router.push('/login');
+          }}
+          className="w-full flex items-center justify-center gap-3 p-4 border border-crypto-red/20 bg-crypto-red/5 text-crypto-red rounded-xl font-black uppercase text-xs tracking-widest"
+        >
+          <LogOut size={16} /> Terminate_Active_Session
+        </button>
+      </div>
     </div>
   );
 }
