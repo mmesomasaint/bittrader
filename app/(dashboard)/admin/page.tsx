@@ -1,6 +1,6 @@
 "use client";
 import { useUser } from '@/hooks/use-user';
-import { ShieldCheck, Zap, Cpu, Users, BarChart3 } from "lucide-react";
+import { ShieldCheck, Zap, Cpu, Users, BarChart3, Terminal } from "lucide-react";
 import { redirect } from 'next/navigation';
 
 interface AdminStatCardProps {
