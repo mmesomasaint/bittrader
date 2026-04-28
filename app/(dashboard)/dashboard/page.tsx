@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/supabaseClient';
 import { useUser } from '@/hooks/use-user';
-import { Zap, Activity, TrendingUp, Wallet, ArrowUpRight, Globe, ShieldAlert } from "lucide-react";
+import { Zap, Activity, TrendingUp, Wallet, ArrowUpRight, Globe, ShieldAlert, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function DashboardMain() {
