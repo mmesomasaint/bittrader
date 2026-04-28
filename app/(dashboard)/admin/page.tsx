@@ -21,7 +21,7 @@ export default function AdminDashboard() {
       
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-red-900/30 pb-4 md:pb-6">
-        <ShieldCheck className="text-red-500 shrink-0" size={24} md:size={28} />
+        <ShieldCheck className="text-red-500 shrink-0 w-6 h-6 md:w-7 md:h-7" />
         <h1 className="text-lg md:text-2xl font-black text-white uppercase italic truncate">
           System_Override_Console
         </h1>
