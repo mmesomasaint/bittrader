@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Globe, Lock, Send, BellRing, Info } from "lucide-react";
+import { ShieldCheck, Globe, Lock, Send, BellRing, Info, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
 import { createClient } from "@/lib/supabase/client";
