@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 
 export function useUser() {
   const [user, setUser] = useState<User | null>(null);
@@ -14,23 +15,21 @@ export function useUser() {
 
     const fetchData = async () => {
       try {
-        // 1. Get Auth User
+        // Get Auth User
         const { data: { user: authUser } } = await supabase.auth.getUser();
         setUser(authUser);
-        console.log(authUser); // Debug line.
 
         if (authUser) {
-          // 2. Fetch Profile and WAIT for it
+          // Fetch Profile and WAIT for it
           const { data: initialProfile } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', authUser.id)
             .single();
 
-          console.log(initialProfile); // Debug line.
           setProfile(initialProfile);
 
-          // 3. Set up Real-time listener
+          // Set up Real-time listener
           channel = supabase
             .channel(`profile-updates-${authUser.id}`)
             .on(
@@ -49,8 +48,9 @@ export function useUser() {
         }
       } catch (error) {
         console.error("Hook Error:", error);
+        toast.error("ERROR FETCHING USER.")
       } finally {
-        // 4. ONLY stop loading once everything (auth + profile) is done
+        // ONLY stop loading once everything (auth + profile) is done
         setLoading(false);
       }
     };
