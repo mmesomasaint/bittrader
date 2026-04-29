@@ -10,48 +10,56 @@ export function useUser() {
   const supabase = createClient();
 
   useEffect(() => {
+    let channel: any;
+
     const fetchData = async () => {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      setUser(authUser);
+      try {
+        // 1. Get Auth User
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        setUser(authUser);
 
-      if (authUser) {
-        // 1. Initial Fetch
-        const { data: initialProfile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', authUser.id)
-          .single();
-        
-        setProfile(initialProfile);
+        if (authUser) {
+          // 2. Fetch Profile and WAIT for it
+          const { data: initialProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authUser.id)
+            .single();
+          
+          setProfile(initialProfile);
 
-        // 2. Real-time Subscription
-        // This listens for any UPDATE to YOUR row in the profiles table
-        const channel = supabase
-          .channel(`profile-updates-${authUser.id}`)
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'profiles',
-              filter: `id=eq.${authUser.id}`,
-            },
-            (payload) => {
-              console.log("Profile Sync Active: New Tier Detected", payload.new.tier);
-              setProfile(payload.new);
-            }
-          )
-          .subscribe();
-
-        return () => {
-          supabase.removeChannel(channel);
-        };
+          // 3. Set up Real-time listener
+          channel = supabase
+            .channel(`profile-updates-${authUser.id}`)
+            .on(
+              'postgres_changes',
+              {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'profiles',
+                filter: `id=eq.${authUser.id}`,
+              },
+              (payload) => {
+                setProfile(payload.new);
+              }
+            )
+            .subscribe();
+        }
+      } catch (error) {
+        console.error("Hook Error:", error);
+      } finally {
+        // 4. ONLY stop loading once everything (auth + profile) is done
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchData();
-  }, []); // Re-runs if auth state changes
+
+    // Cleanup function
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, []);
 
   const isPro = profile?.tier === 'pro' || profile?.tier === 'elite';
 
