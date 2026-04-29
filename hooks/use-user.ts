@@ -17,6 +17,7 @@ export function useUser() {
         // 1. Get Auth User
         const { data: { user: authUser } } = await supabase.auth.getUser();
         setUser(authUser);
+        console.log(authUser): // Debug line.
 
         if (authUser) {
           // 2. Fetch Profile and WAIT for it
