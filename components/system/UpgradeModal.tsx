@@ -15,13 +15,7 @@ export function UpgradeModal({ isOpen, onClose }: { isOpen: boolean, onClose: ()
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <div className="bg-crypto-card border border-crypto-gold/30 max-w-md w-full rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(240,185,11,0.1)]">
-        <div className="bg-import dynamic from 'next/dynamic';
-
-// Dynamically import the button and disable Server-Side Rendering (SSR)
-const UpgradeButton = dynamic(
-  () => import('../ui/UpgradeButton').then((mod) => mod.UpgradeButton),
-  { ssr: false }
-);-gold p-1 text-center text-[10px] font-black text-black uppercase tracking-widest">
+        <div className="bg-gold p-1 text-center text-[10px] font-black text-black uppercase tracking-widest">
           Limited Access Detected
         </div>
         
