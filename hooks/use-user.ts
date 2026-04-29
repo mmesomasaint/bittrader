@@ -25,7 +25,8 @@ export function useUser() {
             .select('*')
             .eq('id', authUser.id)
             .single();
-          
+
+          console.log(initialProfile); // Debug line.
           setProfile(initialProfile);
 
           // 3. Set up Real-time listener
