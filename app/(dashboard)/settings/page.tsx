@@ -6,7 +6,7 @@ import { ShieldCheck, Globe, Lock, Send, BellRing, Info, LogOut, Loader2 } from 
 import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
 import { createClient } from "@/lib/supabase/client";
-import { updateApiKeys } from "./actions";
+import { updateApiKeys, updateRiskStrategy } from "./actions";
 import { UpgradeModal } from "@/components/system/UpgradeModal";
 
 const EXCHANGES = [
@@ -21,6 +21,10 @@ export default function MultiExchangeSettings() {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [telegramId, setTelegramId] = useState("");
   const [keys, setKeys] = useState({ bybit_key: "", bybit_secret: "", binance_key: "", binance_secret: "" });
+  const [riskMode, setRiskMode] = useState<'percent' | 'fixed'>('percent');
+  const [riskPercent, setRiskPercent] = useState("1.0");
+  const [fixedAmount, setFixedAmount] = useState("10.0");
+  const [isSavingRisk, setIsSavingRisk] = useState(false);
   
   // State to track which card is currently updating
   const [updating, setUpdating] = useState<string | null>(null);
@@ -28,6 +32,11 @@ export default function MultiExchangeSettings() {
   useEffect(() => {
     if (profile) {
       setTelegramId(profile.telegram_chat_id || "");
+      
+      setRiskMode(profile.risk_mode || 'percent');
+      setRiskPercent(String(profile.risk_per_trade || "1.0"));
+      setFixedAmount(String(profile.fixed_amount || "10.0"));
+      
       setKeys({
         bybit_key: profile.bybit_api_key || "",
         bybit_secret: profile.bybit_secret || "",
@@ -68,6 +77,33 @@ export default function MultiExchangeSettings() {
     } finally {
       // Clear loading state
       setUpdating(null);
+    }
+  };
+
+  const handleSaveRisk = async () => {
+    if (!isPro) return setShowUpgrade(true);
+    
+    setIsSavingRisk(true);
+    
+    // We'll pass this to a new server action or update the existing one
+    const formData = new FormData();
+    formData.append('risk_mode', riskMode);
+    formData.append('risk_per_trade', riskPercent);
+    formData.append('fixed_amount', fixedAmount);
+  
+    try {
+      // Re-using a pattern similar to updateApiKeys
+      const result = await updateRiskStrategy(formData); 
+      
+      if (result.success) {
+        toast.success("STRATEGY_SYNCED");
+      } else {
+        toast.error(result.error || "SYNC_ERROR");
+      }
+    } catch (err) {
+      toast.error("VAULT_CONNECTION_ERROR");
+    } finally {
+      setIsSavingRisk(false);
     }
   };
 
@@ -176,6 +212,13 @@ export default function MultiExchangeSettings() {
 
       {/* Risk Management Card */}
       <div className="bg-crypto-card border border-crypto-border rounded-xl overflow-hidden">
+        {/* Display loader when saving */}
+        {isSavingRisk && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-50 flex flex-col items-center justify-center gap-3">
+            <Loader2 size={24} className="text-crypto-gold animate-spin" />
+            <span className="text-[8px] font-black text-white tracking-[0.2em] animate-pulse">CALIBRATING_RISK</span>
+          </div>
+        )}
         <div className="p-4 bg-white/5 border-b border-crypto-border flex items-center gap-2">
           <ShieldCheck size={16} className="text-crypto-gold" />
           <span className="font-bold uppercase text-[10px] text-white">Risk Intelligence</span>
