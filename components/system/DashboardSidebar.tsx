@@ -26,7 +26,7 @@ export default function DashboardSidebar({ user }: { user: any }) {
     <aside className="w-64 border-r border-crypto-border flex flex-col bg-black h-full">
       <div className="p-8">
         <div className="text-2xl font-black italic text-white tracking-tighter">
-          <span className="text-crypto-gold">OPTIMA.</span>LOGIC
+          <span className="text-crypto-gold">BIT.</span>TRADER
         </div>
         <p className="text-[10px] text-gray-600 font-mono mt-2 uppercase tracking-[0.3em]">
           OP: {user.email?.split('@')[0]}
