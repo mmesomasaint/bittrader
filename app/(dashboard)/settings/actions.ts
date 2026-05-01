@@ -1,43 +1,45 @@
 "use server";
-
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { encrypt } from "@/lib/crypto";
 
 export async function updateApiKeys(formData: FormData) {
   const supabase = await createClient();
-  
-  // Get user session
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("UNAUTHORIZED");
-  
-  // Extract and Validate
-  const rawKey = formData.get('api_key');
+  if (!user) return { success: false, error: "UNAUTHORIZED" };
 
-  // We check if it's a string and not null
-  if (typeof rawKey !== 'string' || !rawKey) {
-     return { success: false, error: "A valid API Key string is required." };
+  const rawKey = formData.get('api_key') as string;
+  const rawSecret = formData.get('api_secret') as string;
+  const exchange = formData.get('exchange') as string; // 'bybit' or 'binance'
+
+  if (!rawKey || !rawSecret) {
+    return { success: false, error: "Both Key and Secret are required." };
   }
-  
-  // Now TypeScript knows for 100% certainty that rawKey is a string
+
+  // Encrypt keys before they touch the database
   const encryptedKey = encrypt(rawKey);
+  const encryptedSecret = encrypt(rawSecret);
 
-  // Upsert to public.api_keys
+  // Prepare the dynamic update object
+  const updates: any = {};
+  if (exchange === 'bybit') {
+    updates.bybit_api_key = encryptedKey;
+    updates.bybit_secret = encryptedSecret;
+  } else if (exchange === 'binance') {
+    updates.binance_api_key = encryptedKey;
+    updates.binance_secret = encryptedSecret;
+  }
+
   const { error } = await supabase
-    .from('api_keys')
-    .upsert({ 
-      user_id: user.id, 
-      encrypted_key: encryptedKey,
-      exchange_name: 'bybit'
-    });
-
+    .from('profiles')
+    .update(updates)
+    .eq('id', user.id);
 
   if (error) {
     console.error("Vault Update Error:", error.message);
-    return { success: false, error: error.message };
+    return { success: false, error: "Database Sync Failed" };
   }
 
-  // 4. Clear cache to show updated status
   revalidatePath('/dashboard/settings');
   return { success: true };
 }
