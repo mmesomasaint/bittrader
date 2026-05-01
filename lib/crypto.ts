@@ -7,6 +7,10 @@ const KEY = Buffer.from(process.env.ENCRYPTION_KEY || '', 'hex');
 
 export function encrypt(text: string): string {
   if (!text) return "";
+  
+  // DEBUG: Check length in your Vercel logs
+  console.log("DEBUG: Key Length is:", KEY.length);
+  
   if (KEY.length !== 32) throw new Error("ENCRYPTION_KEY must be 32 bytes (64 hex chars)");
 
   const iv = crypto.randomBytes(IV_LENGTH);
