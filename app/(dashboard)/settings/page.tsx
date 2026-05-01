@@ -6,6 +6,7 @@ import { ShieldCheck, Globe, Lock, Send, BellRing, Info, LogOut } from "lucide-r
 import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
 import { createClient } from "@/lib/supabase/client";
+import { updateApiKeys } from "./actions";
 import { UpgradeModal } from "@/components/system/UpgradeModal";
 
 const EXCHANGES = [
@@ -37,13 +38,28 @@ export default function MultiExchangeSettings() {
 
   const handleSaveKeys = async (exchangeId: string) => {
     if (!isPro) return setShowUpgrade(true);
-    const updates = exchangeId === 'bybit' 
-      ? { bybit_key: keys.bybit_key, bybit_secret: keys.bybit_secret }
-      : { binance_key: keys.binance_key, binance_secret: keys.binance_secret };
-
-    const { error } = await supabase.from('profiles').update(updates).eq('id', user?.id);
-    if (error) toast.error("SYNC_ERROR");
-    else toast.success("VAULT_UPDATED");
+  
+    // 1. Prepare FormData (required for Server Actions)
+    const formData = new FormData();
+    
+    if (exchangeId === 'bybit') {
+      formData.append('api_key', keys.bybit_key);
+      formData.append('api_secret', keys.bybit_secret); // Add secret too!
+      formData.append('exchange', 'bybit');
+    } else {
+      formData.append('api_key', keys.binance_key);
+      formData.append('api_secret', keys.binance_secret);
+      formData.append('exchange', 'binance');
+    }
+  
+    // 2. Call the Server Action
+    const result = await updateApiKeys(formData);
+  
+    if (result.success) {
+      toast.success("VAULT_UPDATED");
+    } else {
+      toast.error(result.error || "SYNC_ERROR");
+    }
   };
 
   return (
