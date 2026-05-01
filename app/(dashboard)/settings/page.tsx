@@ -6,7 +6,7 @@ import { ShieldCheck, Globe, Lock, Send, BellRing, Info, LogOut } from "lucide-r
 import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
 import { createClient } from "@/lib/supabase/client";
-import updateApiKeys from "./actions";
+import { updateApiKeys } from "./actions";
 import { UpgradeModal } from "@/components/system/UpgradeModal";
 
 const EXCHANGES = [
