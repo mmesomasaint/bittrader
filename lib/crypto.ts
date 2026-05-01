@@ -1,15 +1,15 @@
 import crypto from 'crypto';
 
-const ALGORITHM = 'aes-256-gcm';
-const IV_LENGTH = 12; // Standard for GCM
-const AUTH_TAG_LENGTH = 16;
-const KEY = Buffer.from(process.env.ENCRYPTION_KEY || '', 'hex');
-
 export function encrypt(text: string): string {
   if (!text) return "";
+
+  const ALGORITHM = 'aes-256-gcm';
+  const IV_LENGTH = 12; // Standard for GCM
+  const AUTH_TAG_LENGTH = 16;
+  const KEY = Buffer.from(process.env.ENCRYPTION_KEY || '', 'hex');
   
   // DEBUG: Check length in your Vercel logs
-  console.log("DEBUG: Key Length is:", KEY.length);
+  console.error("DEBUG: Key Length is:", KEY.length);
   
   if (KEY.length !== 32) throw new Error("ENCRYPTION_KEY must be 32 bytes (64 hex chars)");
 
