@@ -22,7 +22,7 @@ export default function MultiExchangeSettings() {
   const [telegramId, setTelegramId] = useState("");
   const [keys, setKeys] = useState({ bybit_key: "", bybit_secret: "", binance_key: "", binance_secret: "" });
   
-  // NEW: State to track which card is currently updating
+  // State to track which card is currently updating
   const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
@@ -106,13 +106,13 @@ export default function MultiExchangeSettings() {
                 <KeyInput 
                   label="API Key" 
                   value={ex.id === 'bybit' ? keys.bybit_key : keys.binance_key}
-                  disabled={!isPro || isBusy} // Disable while busy
+                  disabled={!isPro || isBusy}
                   onChange={(val: string) => setKeys({...keys, [`${ex.id}_key`]: val})}
                 />
                 <KeyInput 
                   label="Secret Key" 
                   value={ex.id === 'bybit' ? keys.bybit_secret : keys.binance_secret}
-                  disabled={!isPro || isBusy} // Disable while busy
+                  disabled={!isPro || isBusy}
                   type="password"
                   onChange={(val: string) => setKeys({...keys, [`${ex.id}_secret`]: val})}
                 />
@@ -189,4 +189,28 @@ export default function MultiExchangeSettings() {
   );
 }
 
+
+interface KeyInputProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  disabled: boolean;
+  type?: string;
+}
+
+function KeyInput({ label, value, onChange, disabled, type = "text" }: KeyInputProps) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[8px] md:text-[9px] text-gray-600 font-bold uppercase tracking-widest">{label}</label>
+      <input 
+        disabled={disabled}
+        type={type} 
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-crypto-bg border border-crypto-border p-4 rounded-lg text-white font-data text-xs focus:border-crypto-gold outline-none disabled:opacity-30 transition-all"
+        placeholder={disabled ? "PRO_REQUIRED" : `Enter ${label}...`}
+      />
+    </div>
+  );
+}
 // KeyInput doesn't change, just ensure 'disabled' is passed correctly
