@@ -29,9 +29,9 @@ export default function MultiExchangeSettings() {
     if (profile) {
       setTelegramId(profile.telegram_chat_id || "");
       setKeys({
-        bybit_key: profile.bybit_key || "",
+        bybit_key: profile.bybit_api_key || "",
         bybit_secret: profile.bybit_secret || "",
-        binance_key: profile.binance_key || "",
+        binance_key: profile.binance_api_key || "",
         binance_secret: profile.binance_secret || ""
       });
     }
