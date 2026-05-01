@@ -1,12 +1,12 @@
 import crypto from 'crypto';
 
 export function encrypt(text: string): string {
+  if (!text) return "";
+  
   const ALGORITHM = 'aes-256-gcm';
   const IV_LENGTH = 12; // Standard for GCM
   const AUTH_TAG_LENGTH = 16;
   const KEY = Buffer.from(process.env.ENCRYPTION_KEY || '', 'hex');
-  
-  if (!text) return "";
   
   // DEBUG: Check length in your Vercel logs
   console.log("DEBUG: Key Length is:", KEY.length);
@@ -18,7 +18,7 @@ export function encrypt(text: string): string {
 
   let encrypted = cipher.update(text, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-
+  
   const authTag = cipher.getAuthTag().toString('hex');
 
   // We store the IV and AuthTag along with the encrypted data
@@ -29,6 +29,10 @@ export function encrypt(text: string): string {
 export function decrypt(hash: string): string {
   if (!hash) return "";
   
+  const ALGORITHM = 'aes-256-gcm';
+  const IV_LENGTH = 12; // Standard for GCM
+  const AUTH_TAG_LENGTH = 16;
+  const KEY = Buffer.from(process.env.ENCRYPTION_KEY || '', 'hex');
   const [ivHex, authTagHex, encryptedHex] = hash.split(':');
   
   const iv = Buffer.from(ivHex, 'hex');
