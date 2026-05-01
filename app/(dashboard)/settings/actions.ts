@@ -3,6 +3,30 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { encrypt } from "@/lib/crypto";
 
+export async function updateRiskStrategy(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "UNAUTHORIZED" };
+
+  const risk_mode = formData.get('risk_mode') as string;
+  const risk_per_trade = parseFloat(formData.get('risk_per_trade') as string);
+  const fixed_amount = parseFloat(formData.get('fixed_amount') as string);
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ 
+      risk_mode, 
+      risk_per_trade, 
+      fixed_amount 
+    })
+    .eq('id', user.id);
+
+  if (error) return { success: false, error: error.message };
+  
+  revalidatePath('/dashboard/settings');
+  return { success: true };
+}
+
 export async function updateApiKeys(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
