@@ -174,6 +174,55 @@ export default function MultiExchangeSettings() {
         </div>
       </div>
 
+      {/* Risk Management Card */}
+      <div className="bg-crypto-card border border-crypto-border rounded-xl overflow-hidden">
+        <div className="p-4 bg-white/5 border-b border-crypto-border flex items-center gap-2">
+          <ShieldCheck size={16} className="text-crypto-gold" />
+          <span className="font-bold uppercase text-[10px] text-white">Risk Intelligence</span>
+        </div>
+        
+        <div className="p-6 space-y-6">
+          <div className="flex gap-4">
+            {/* Risk Mode Toggle */}
+            <button 
+              onClick={() => setRiskMode('percent')}
+              className={`flex-1 p-3 rounded-lg border text-[10px] font-black uppercase transition-all ${riskMode === 'percent' ? 'bg-crypto-gold text-black border-crypto-gold' : 'bg-transparent text-gray-500 border-white/10'}`}
+            >
+              % Equity
+            </button>
+            <button 
+              onClick={() => setRiskMode('fixed')}
+              className={`flex-1 p-3 rounded-lg border text-[10px] font-black uppercase transition-all ${riskMode === 'fixed' ? 'bg-crypto-gold text-black border-crypto-gold' : 'bg-transparent text-gray-500 border-white/10'}`}
+            >
+              Fixed USD
+            </button>
+          </div>
+      
+          {riskMode === 'percent' ? (
+            <KeyInput 
+              label="Risk Per Trade (%)" 
+              value={riskPercent} 
+              onChange={setRiskPercent}
+              disabled={!isPro}
+            />
+          ) : (
+            <KeyInput 
+              label="Fixed Amount (USD)" 
+              value={fixedAmount} 
+              onChange={setFixedAmount}
+              disabled={!isPro}
+            />
+          )}
+      
+          <button 
+            onClick={handleSaveRisk}
+            className="w-full bg-crypto-gold text-black font-black py-4 rounded-lg uppercase text-[10px] tracking-widest hover:brightness-110"
+          >
+            Update Risk Strategy
+          </button>
+        </div>
+      </div>
+
       <div className="lg:hidden pt-10 pb-20">
         <button 
           onClick={async () => {
