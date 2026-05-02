@@ -365,4 +365,3 @@ function KeyInput({ label, value, onChange, disabled, type = "text" }: KeyInputP
     </div>
   );
 }
-// KeyInput doesn't change, just ensure 'disabled' is passed correctly
