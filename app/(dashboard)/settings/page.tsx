@@ -57,7 +57,7 @@ export default function MultiExchangeSettings() {
   const handleSaveKeys = async (exchangeId: string) => {
     if (!isPro) return setShowUpgrade(true);
     
-    // Set loading for this specific exchange
+    // Set loading for a specific exchange
     setUpdating(exchangeId);
   
     const formData = new FormData();
@@ -180,7 +180,7 @@ export default function MultiExchangeSettings() {
         })}
       </div>
 
-      {/* Telegram Card - With similar individual loading logic */}
+      {/* Telegram Card */}
       <div className="bg-crypto-card border border-[#24A1DE]/20 rounded-xl overflow-hidden relative">
         {updating === 'telegram' && (
           <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-50 flex items-center justify-center gap-2">
