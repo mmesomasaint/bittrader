@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ShieldCheck, Globe, Lock, Send, BellRing, Info, LogOut, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
+import { useAlphaSources } from "@/hooks/use-alphasources";
 import { createClient } from "@/lib/supabase/client";
 import { updateApiKeys, updateRiskStrategy } from "./actions";
 import { UpgradeModal } from "@/components/system/UpgradeModal";
@@ -28,6 +29,11 @@ export default function MultiExchangeSettings() {
   
   // State to track which card is currently updating
   const [updating, setUpdating] = useState<string | null>(null);
+
+  // State to track sources
+  const { sources, addSource, removeSource, isLoading } = useAlphaSources();
+  const [newHandle, setNewHandle] = useState("");
+  const LIMIT = 5; // SaaS handle Limit
 
   useEffect(() => {
     if (profile) {
@@ -105,6 +111,12 @@ export default function MultiExchangeSettings() {
     } finally {
       setIsSavingRisk(false);
     }
+  };
+
+  const handleAdd = async () => {
+    if (sources.length >= LIMIT) return toast.error("LIMIT_REACHED");
+    await addSource(newHandle);
+    setNewHandle("");
   };
 
   return (
@@ -264,6 +276,54 @@ export default function MultiExchangeSettings() {
             Update Risk Strategy
           </button>
         </div>
+      </div>
+
+      {/* X profile inputs */}
+      <div className="bg-crypto-card border border-crypto-border rounded-xl p-6 relative overflow-hidden">
+        {isLoading && <div className="absolute inset-0 bg-black/40 animate-pulse z-10" />}
+        
+        <h3 className="text-[10px] font-black uppercase text-white mb-4 tracking-widest">
+          Alpha Sources <span className="text-crypto-gold">({sources.length}/{LIMIT})</span>
+        </h3>
+        
+        <div className="space-y-2">
+          {sources.map(source => (
+            <div key={source.id} className="flex justify-between items-center bg-white/5 p-3 rounded border border-white/5">
+              <span className="text-gray-300 font-mono text-[11px]">@{source.handle}</span>
+              <button 
+                onClick={() => removeSource(source.id)}
+                className="text-red-500/50 hover:text-red-500 text-[9px] uppercase font-bold transition-colors"
+              >
+                [ Remove ]
+              </button>
+            </div>
+          ))}
+        </div>
+  
+        {isPro && sources.length < LIMIT && (
+          <div className="mt-6 flex flex-col gap-2">
+            <input 
+              value={newHandle}
+              onChange={(e) => setNewHandle(e.target.value)}
+              className="bg-black/40 border border-white/10 p-3 text-[11px] outline-none focus:border-crypto-gold text-white"
+              placeholder="Enter X Handle (e.g. WhaleAlert)"
+            />
+            <button 
+              onClick={handleAdd}
+              className="bg-white text-black py-3 rounded font-black text-[10px] uppercase tracking-tighter hover:bg-crypto-gold transition-all"
+            >
+              Authorize Source
+            </button>
+          </div>
+        )}
+        
+        {!isPro && (
+          <div className="mt-4 p-4 border border-dashed border-white/10 rounded">
+            <p className="text-[9px] text-gray-500 uppercase leading-relaxed">
+              Custom Alpha Intelligence is locked. <span className="text-crypto-gold underline cursor-pointer">Upgrade to Pro</span> to add personal sources.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="lg:hidden pt-10 pb-20">
