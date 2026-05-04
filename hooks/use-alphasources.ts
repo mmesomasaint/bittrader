@@ -37,12 +37,17 @@ export function useAlphaSources() {
     const cleanHandle = handle.replace('@', '').trim();
     if (!cleanHandle) return;
 
-    // For now, we'll store the handle and let the backend resolve the ID
     const { data: { user } } = await supabase.auth.getUser();
+    
+    // Safety Guard: If no user is found, stop and notify
+    if (!user) {
+      toast.error("AUTH_SESSION_EXPIRED");
+      return;
+    }
     
     const { data, error } = await supabase
       .from('alpha_sources')
-      .insert([{ user_id: user.id, handle: cleanHandle }])
+      .insert([{ user_id: user.id, handle: cleanHandle }]) // Now TS knows user is not null
       .select()
       .single();
 
