@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 const TARGET_SYMBOLS = ["btcusdt", "ethusdt", "solusdt", "bnbusdt", "xrpusdt"];
 
-export function LiveTicker() {
+export default function LiveTicker() {
   // Use the uppercase version for the state keys to match Binance's response
   const [prices, setPrices] = useState<Record<string, { price: string; change: string }>>({});
 
