@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Zap, Shield, BarChart3, ChevronRight, Globe, Cpu, Check, X } from "lucide-react";
-import WinRateShowcase from "@/components/system/WinRateShowcase"; // Move your previous code to this component
+import WinRateShowcase from "@/components/system/WinRateShowcase";
+import LiveTicker from "@/components/system/LiveTicker";
 
 export default function LandingPage() {
   return (
@@ -239,11 +240,44 @@ export default function LandingPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="py-10 border-t border-white/5 text-center">
-        <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">
-          © 2026 Optima Logic Venture Studio. Institutional Grade Trading Infrastructure.
-        </p>
+      <footer className="pt-20 pb-10 bg-black border-t border-white/5">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+          <div className="col-span-2">
+            <h3 className="text-2xl font-black italic uppercase mb-4 tracking-tighter">Black Marlin<span className="text-crypto-gold">.</span></h3>
+            <p className="text-gray-600 text-xs uppercase leading-relaxed max-w-sm tracking-wider">
+              BitTrader is an AI-native lead generation and automated execution infrastructure. 
+              Engineered by Optima Logic Venture Studio for high-frequency institutional advantage.
+            </p>
+          </div>
+          <div>
+            <h4 className="text-[10px] font-black uppercase text-white mb-6 tracking-widest">Protocols</h4>
+            <ul className="space-y-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+              <li><Link href="/guidance" className="hover:text-crypto-gold transition">Guideline</Link></li>
+              <li><Link href="#" className="hover:text-crypto-gold transition">Risk Protocol V4</Link></li>
+              <li><Link href="/signup" className="hover:text-crypto-gold transition">Activate Session</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-[10px] font-black uppercase text-white mb-6 tracking-widest">Studio</h4>
+            <ul className="space-y-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+              <li><Link href="https://optimalogic.studio" className="hover:text-crypto-gold transition">Optima Logic</Link></li>
+              <li><Link href="/login" className="hover:text-crypto-gold transition">Terminal Login</Link></li>
+              <li><Link href="https://optimalogic.studio/status" className="hover:text-crypto-gold transition">Studio Status</Link></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="text-center pb-10">
+           <p className="text-[9px] text-gray-800 font-bold uppercase tracking-[0.5em]">
+            © 2026 Optima Logic Venture Studio // All Rights Reserved.
+          </p>
+        </div>
       </footer>
+
+      {/* THE TICKER - FIXED AT BOTTOM */}
+      <div className="fixed bottom-0 left-0 w-full z-50">
+        <LiveTicker />
+      </div>
     </div>
   );
 }
