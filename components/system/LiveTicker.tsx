@@ -2,44 +2,58 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const TARGET_SYMBOLS = ["btcusdt", "ethusdt", "solusdt", "bnbusdt", "xrpusdt"];
+// Bybit uses uppercase while binance uses lowercase
+const TARGET_SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT"];
 
 export default function LiveTicker() {
-  // Use the uppercase version for the state keys to match Binance's response
+  // Use the uppercase version for the state keys to match Bybit's response
   const [prices, setPrices] = useState<Record<string, { price: string; change: string }>>({});
 
   useEffect(() => {
-    const streamNames = TARGET_SYMBOLS.map((s) => `${s}@ticker`).join("/");
-    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streamNames}`);
+    // Bybit V5 Public Stream
+    const ws = new WebSocket("wss://stream.bytick.com/v5/public/linear");
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      
-      // Binance returns the symbol in uppercase (e.g., 'BTCUSDT')
-      const symbol = data.s; 
-      const lastPrice = parseFloat(data.c).toLocaleString(undefined, { 
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2 
-      });
-      const priceChange = parseFloat(data.P).toFixed(2);
-
-      setPrices((prev) => ({
-        ...prev,
-        [symbol]: {
-          price: lastPrice,
-          change: (parseFloat(priceChange) >= 0 ? "+" : "") + priceChange + "%",
-        },
-      }));
+    ws.onopen = () => {
+      // Subscribing to multiple tickers in one command
+      const subscribeMsg = {
+        op: "subscribe",
+        args: TARGET_SYMBOLS.map(s => `tickers.${s}`)
+      };
+      ws.send(JSON.stringify(subscribeMsg));
     };
 
-    ws.onerror = (err) => {
-      toast.error("WEBSOCKET_ERROR");
-      console.error("WebSocket Error:", err);
+    ws.onmessage = (event) => {
+      const response = JSON.parse(event.data);
+      
+      // Bybit pushes 'snapshot' or 'delta' updates
+      if (response.topic && response.topic.startsWith("tickers")) {
+        const data = response.data;
+        const symbol = data.symbol;
+        
+        const lastPrice = parseFloat(data.lastPrice).toLocaleString(undefined, { 
+          minimumFractionDigits: 2 
+        });
+        const priceChange = parseFloat(data.price24hPcnt * 100).toFixed(2);
+
+        setPrices((prev) => ({
+          ...prev,
+          [symbol]: {
+            price: lastPrice,
+            change: (parseFloat(priceChange) >= 0 ? "+" : "") + priceChange + "%",
+          },
+        }));
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.log("WebSocket error: ", error);
+      toast.error("ERROR_FETCHING_TICKERS");
     }
 
     return () => ws.close();
   }, []);
 
+  
   return (
     <div className="bg-crypto-gold text-black py-2 overflow-hidden whitespace-nowrap border-y border-black/10 select-none">
       <div className="inline-block animate-marquee">
