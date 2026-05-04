@@ -36,7 +36,7 @@ export default function WinRateShowcase() {
                 <BarChart3 size={16} className="text-gray-700 group-hover:text-crypto-gold" />
               </div>
               <div className="space-y-1">
-                <p className="text-5xl font-black text-white italic tracking-tighter">{item.win_rate}%</p>
+                <p className="text-5xl font-black text-white italic tracking-tighter">{(Number(item.win_rate) || 0).toFixed(2)}%</p>
                 <p className="text-[10px] text-crypto-green font-bold uppercase tracking-tighter">Win Probability</p>
               </div>
               <div className="mt-6 pt-4 border-t border-white/5 text-[9px] text-gray-600 font-mono">
