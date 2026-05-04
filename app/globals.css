@@ -21,11 +21,6 @@
 
   /* The Animation utility */
   --animate-marquee: marquee 25s linear infinite;
-
-  /* Vary animation speed by screen sizes */
-  @media (max-width: 768px) {
-    --animate-marquee: marquee 15s linear infinite;
-  }
 }
 
 @layer base {
