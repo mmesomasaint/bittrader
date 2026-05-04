@@ -158,13 +158,13 @@ export default function LandingPage() {
                 profit: "+22.4%"
               },
               {
-                name: "Saint_Logic",
+                name: "Michael_X",
                 role: "Systems Architect",
                 body: "BitTrader's neural filtering caught the SOL flip 4 minutes before the major CT accounts posted it. The Risk V4 module paid for itself in one trade.",
                 profit: "+18.9%"
               },
               {
-                name: "Mmesoma_V",
+                name: "Chinoso_V",
                 role: "Institutional Lead",
                 body: "The dark-themed industrial UI makes long monitoring sessions easy on the eyes. High-intent liquidity shifts are finally visible.",
                 profit: "+31.2%"
@@ -243,7 +243,7 @@ export default function LandingPage() {
       <footer className="pt-20 pb-10 bg-black border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
           <div className="col-span-2">
-            <h3 className="text-2xl font-black italic uppercase mb-4 tracking-tighter">Black Marlin<span className="text-crypto-gold">.</span></h3>
+            <h3 className="text-2xl font-black italic uppercase mb-4 tracking-tighter">Bit<span className="text-crypto-gold">.</span>Trader</h3>
             <p className="text-gray-600 text-xs uppercase leading-relaxed max-w-sm tracking-wider">
               BitTrader is an AI-native lead generation and automated execution infrastructure. 
               Engineered by Optima Logic Venture Studio for high-frequency institutional advantage.
@@ -253,7 +253,7 @@ export default function LandingPage() {
             <h4 className="text-[10px] font-black uppercase text-white mb-6 tracking-widest">Protocols</h4>
             <ul className="space-y-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
               <li><Link href="/guidance" className="hover:text-crypto-gold transition">Guideline</Link></li>
-              <li><Link href="#" className="hover:text-crypto-gold transition">Risk Protocol V4</Link></li>
+              <li><Link href="/login" className="hover:text-crypto-gold transition">Terminal Login</Link></li>
               <li><Link href="/signup" className="hover:text-crypto-gold transition">Activate Session</Link></li>
             </ul>
           </div>
@@ -261,7 +261,7 @@ export default function LandingPage() {
             <h4 className="text-[10px] font-black uppercase text-white mb-6 tracking-widest">Studio</h4>
             <ul className="space-y-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
               <li><Link href="https://optimalogic.studio" className="hover:text-crypto-gold transition">Optima Logic</Link></li>
-              <li><Link href="/login" className="hover:text-crypto-gold transition">Terminal Login</Link></li>
+              <li><Link href="#" className="hover:text-crypto-gold transition">Risk Protocol V4</Link></li>
               <li><Link href="https://optimalogic.studio/status" className="hover:text-crypto-gold transition">Studio Status</Link></li>
             </ul>
           </div>
