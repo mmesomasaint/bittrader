@@ -12,6 +12,20 @@
   /* Typography */
   --font-crypto: "Inter", "system-ui", sans-serif;
   --font-data: "JetBrains Mono", monospace;
+
+  /* Animations */
+  @keyframes marquee {
+    from { transform: translateX(0%); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* The Animation utility */
+  --animate-marquee: marquee 25s linear infinite;
+
+  /* Vary animation speed by screen sizes */
+  @media (max-width: 768px) {
+    --animate-marquee: marquee 15s linear infinite;
+  }
 }
 
 @layer base {
