@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 const TARGET_SYMBOLS = ["btcusdt", "ethusdt", "solusdt", "bnbusdt", "xrpusdt"];
 
-export function LiveTicker() {
+export default function LiveTicker() {
   const [prices, setPrices] = useState<Record<string, { price: string; change: string }>>({});
 
   useEffect(() => {
