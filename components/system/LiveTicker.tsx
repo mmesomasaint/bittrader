@@ -28,20 +28,27 @@ export default function LiveTicker() {
       // Bybit pushes 'snapshot' or 'delta' updates
       if (response.topic && response.topic.startsWith("tickers")) {
         const data = response.data;
-        const symbol = data.symbol;
+        // Bybit V5 returns data as an object in snapshot, or sometimes inside a delta
+        // If it's a snapshot, it's usually data.lastPrice. 
+        // If it's a delta, the fields might be partial, so we check for existence.
         
-        const lastPrice = parseFloat(data.lastPrice).toLocaleString(undefined, { 
-          minimumFractionDigits: 2 
-        });
-        const priceChange = parseFloat(data.price24hPcnt * 100).toFixed(2);
-
-        setPrices((prev) => ({
-          ...prev,
-          [symbol]: {
-            price: lastPrice,
-            change: (parseFloat(priceChange) >= 0 ? "+" : "") + priceChange + "%",
-          },
-        }));
+        if (data.lastPrice && data.symbol) {
+          const symbol = data.symbol;
+          
+          const lastPrice = parseFloat(data.lastPrice).toLocaleString(undefined, { 
+            minimumFractionDigits: 2 
+          });
+          
+          const priceChangePercent = data.price24hPcnt ? (Number(data.price24hPcnt) * 100).toFixed(2) : "0.00";
+  
+          setPrices((prev) => ({
+            ...prev,
+            [symbol]: {
+              price: lastPrice,
+              change: (parseFloat(priceChangePercent) >= 0 ? "+" : "") + priceChangePercent + "%",
+            },
+          }));
+        }
       }
     };
 
