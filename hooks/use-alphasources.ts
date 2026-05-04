@@ -2,8 +2,16 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
+interface AlphaSource {
+  id: string;
+  handle: string;
+  twitter_id?: string;
+  user_id: string;
+  created_at: string;
+}
+
 export function useAlphaSources() {
-  const [sources, setSources] = useState([]);
+  const [sources, setSources] = useState<AlphaSource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
 
