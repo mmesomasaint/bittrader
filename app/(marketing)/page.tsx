@@ -133,6 +133,100 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* 5. OPERATOR FEEDBACK (Testimonials) */}
+      <section className="py-24 bg-black overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
+            <div>
+              <h2 className="text-4xl font-black italic uppercase tracking-tighter">Field Reports</h2>
+              <p className="text-gray-500 font-mono text-[10px] uppercase tracking-[0.3em] mt-2">Verified Operator Feedback // 2026_Q2</p>
+            </div>
+            <div className="h-[1px] flex-1 bg-white/10 mx-8 hidden md:block mb-4"></div>
+            <div className="text-right">
+              <span className="text-crypto-gold font-black text-4xl">40+</span>
+              <p className="text-[10px] text-gray-600 uppercase font-bold">Active Nodes</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Tony_O",
+                role: "Scalp Specialist",
+                body: "The multi-exchange sync is flawless. I'm hitting entries on Binance and Bybit simultaneously with zero slippage. This isn't a bot, it's an edge.",
+                profit: "+22.4%"
+              },
+              {
+                name: "Saint_Logic",
+                role: "Systems Architect",
+                body: "BitTrader's neural filtering caught the SOL flip 4 minutes before the major CT accounts posted it. The Risk V4 module paid for itself in one trade.",
+                profit: "+18.9%"
+              },
+              {
+                name: "Mmesoma_V",
+                role: "Institutional Lead",
+                body: "The dark-themed industrial UI makes long monitoring sessions easy on the eyes. High-intent liquidity shifts are finally visible.",
+                profit: "+31.2%"
+              }
+            ].map((report, i) => (
+              <div key={i} className="bg-[#0A0A0A] border border-white/5 p-8 rounded-2xl relative group hover:border-crypto-gold/30 transition-colors">
+                <div className="absolute top-4 right-6 font-mono text-[10px] text-crypto-green opacity-50">{report.profit}</div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-crypto-gold/10 rounded flex items-center justify-center border border-crypto-gold/20">
+                    <span className="text-crypto-gold font-black text-[10px]">{report.name[0]}</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-black uppercase italic">{report.name}</p>
+                    <p className="text-[9px] text-gray-600 uppercase tracking-widest">{report.role}</p>
+                  </div>
+                </div>
+                <p className="text-gray-400 text-sm leading-relaxed italic font-medium">"{report.body}"</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. SYSTEM DOCUMENTATION (FAQ) */}
+      <section className="py-24 bg-[#050505]">
+        <div className="max-w-4xl mx-auto px-6">
+          <h2 className="text-3xl font-black italic uppercase tracking-tighter mb-12 text-center">System_Protocol_FAQ</h2>
+          
+          <div className="space-y-4">
+            {[
+              {
+                q: "HOW SECURE ARE MY API KEYS?",
+                a: "Keys are encrypted using AES-256-GCM at the hardware level. BitTrader never requests withdrawal permissions. Your capital stays in your exchange vault."
+              },
+              {
+                q: "WHAT IS THE AVERAGE EXECUTION LATENCY?",
+                a: "Internal node processing is sub-2ms. Final execution depends on exchange API response times, typically averaging 40-120ms globally."
+              },
+              {
+                q: "CAN I RUN CUSTOM X (TWITTER) ALPHA SOURCES?",
+                a: "Pro Operators can link up to 5 custom X handles. Our Neural Engine filters these in real-time to identify high-intent market signals."
+              },
+              {
+                q: "DOES THE BOT TRADE WHILE I AM OFFLINE?",
+                a: "Yes. Black Marlin runs on dedicated industrial-grade VPS infrastructure. Once deployed, execution is 24/7 until manually deactivated."
+              }
+            ].map((faq, i) => (
+              <details key={i} className="group bg-black border border-white/5 rounded-xl overflow-hidden">
+                <summary className="list-none p-6 cursor-pointer flex justify-between items-center hover:bg-white/5 transition-colors">
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-300 group-open:text-crypto-gold">
+                    [0{i+1}] {faq.q}
+                  </span>
+                  <ChevronRight size={16} className="text-gray-600 group-open:rotate-90 transition-transform" />
+                </summary>
+                <div className="px-6 pb-6 text-sm text-gray-500 font-data leading-relaxed border-t border-white/5 pt-4">
+                  {faq.a}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* 5. FINAL CTA */}
       <section className="py-32 border-t border-white/5">
         <div className="max-w-3xl mx-auto px-6 text-center">
